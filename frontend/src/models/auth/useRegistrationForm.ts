@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/authService";
+
 
 export const registrationSchema = yup.object().shape({
   fullName: yup
@@ -18,8 +18,8 @@ export const registrationSchema = yup.object().shape({
   email: yup
     .string()
     .email("Must be a valid email address")
-    .optional()
     .nullable()
+    .defined()
     .transform((value) => (value === "" ? null : value)),
   password: yup
     .string()
