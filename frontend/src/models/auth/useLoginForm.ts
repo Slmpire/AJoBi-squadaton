@@ -8,9 +8,9 @@ import { authService } from "@/services/authService";
 import { isAxiosError } from "axios";
 
 export const loginSchema = yup.object().shape({
-  identifier: yup
+  email: yup
     .string()
-    .required("Phone number or email is required"),
+    .required("Email is required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -31,7 +31,7 @@ export const useLoginForm = () => {
   } = useForm<LoginFormValues>({
     resolver: yupResolver(loginSchema),
     defaultValues: {
-      identifier: "",
+      email: "",
       password: "",
       rememberMe: false,
     },

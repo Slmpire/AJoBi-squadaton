@@ -9,54 +9,33 @@ import SavingsStep from "./parts/SavingsStep";
 import CreditStep from "./parts/CreditStep";
 import FinalStep from "./parts/FinalStep";
 import ScoreRevealStep from "./parts/ScoreRevealStep";
+import { useSetupWizard } from "./model/useSetupWizard";
 
 export default function SetupWizard() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<any>({
-    profileType: "",
-    workDuration: "",
-    state: "",
-    lga: "",
-    incomeRange: "",
-    inAjoGroup: "",
-    saveMethods: [],
-    saveFrequency: "Daily",
-    borrowedMoney: "",
-    paidBackFully: "",
-    paidOnTime: "",
-    language: "",
-  });
-
-  const updateForm = (key: string, value: any) => {
-    setFormData((prev: any) => ({ ...prev, [key]: value }));
-  };
-
-  const toggleArrayItem = (key: string, value: string) => {
-    setFormData((prev: any) => {
-      const arr = prev[key] as string[];
-      if (arr.includes(value)) {
-        return { ...prev, [key]: arr.filter((i) => i !== value) };
-      } else {
-        return { ...prev, [key]: [...arr, value] };
-      }
-    });
-  };
-
-  const nextStep = () => setCurrentStep((prev) => Math.min(prev + 1, 6));
-  const prevStep = () => setCurrentStep((prev) => Math.max(prev - 1, 1));
+  const {
+    currentStep,
+    formData,
+    isSubmitting,
+    error,
+    updateForm,
+    toggleArrayItem,
+    nextStep,
+    prevStep,
+    submitStep,
+  } = useSetupWizard();
 
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <ProfileStep formData={formData} updateForm={updateForm} nextStep={nextStep} />;
+        return <ProfileStep formData={formData} updateForm={updateForm} submitStep={submitStep} isSubmitting={isSubmitting} error={error} />;
       case 2:
-        return <WorkStep formData={formData} updateForm={updateForm} nextStep={nextStep} prevStep={prevStep} />;
+        return <WorkStep formData={formData} updateForm={updateForm} submitStep={submitStep} prevStep={prevStep} isSubmitting={isSubmitting} error={error} />;
       case 3:
-        return <SavingsStep formData={formData} updateForm={updateForm} toggleArrayItem={toggleArrayItem} nextStep={nextStep} prevStep={prevStep} />;
+        return <SavingsStep formData={formData} updateForm={updateForm} toggleArrayItem={toggleArrayItem} submitStep={submitStep} prevStep={prevStep} isSubmitting={isSubmitting} error={error} />;
       case 4:
-        return <CreditStep formData={formData} updateForm={updateForm} nextStep={nextStep} prevStep={prevStep} />;
+        return <CreditStep formData={formData} updateForm={updateForm} submitStep={submitStep} prevStep={prevStep} isSubmitting={isSubmitting} error={error} />;
       case 5:
-        return <FinalStep formData={formData} updateForm={updateForm} nextStep={nextStep} prevStep={prevStep} />;
+        return <FinalStep formData={formData} updateForm={updateForm} submitStep={submitStep} prevStep={prevStep} isSubmitting={isSubmitting} error={error} />;
       case 6:
         return <ScoreRevealStep />;
       default:

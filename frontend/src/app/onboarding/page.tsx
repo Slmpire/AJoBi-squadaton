@@ -6,7 +6,57 @@ import { User, Phone, Mail, Lock, KeyRound, ShieldCheck, Loader2 } from "lucide-
 import { useRegistrationForm } from "@/models/auth/useRegistrationForm";
 
 export default function OnboardingPage() {
-  const { register, handleSubmit, errors, isSubmitting } = useRegistrationForm();
+  const { register, handleSubmit, errors, isSubmitting, isSuccess } = useRegistrationForm();
+
+  if (isSuccess) {
+    return (
+      <div className="max-w-7xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[600px] border border-gray-100">
+        {/* Left Side - Image */}
+        <div className="md:w-6/12 bg-[#0A111F] relative overflow-hidden flex flex-col justify-end p-10 text-white">
+          <div className="absolute inset-0 z-0">
+            <div className="w-full h-full bg-gradient-to-t from-[#0A111F] via-[#0A111F]/50 to-[#0A111F]/20 absolute inset-0 z-10" />
+            <Image
+              src="/images/register_image.png"
+              alt="Register background"
+              fill
+              className="object-cover opacity-40 mix-blend-luminosity"
+              priority
+            />
+          </div>
+
+          <div className="relative z-20 space-y-4">
+            <p className="font-bold text-sm">
+              Empowering the{" "}
+              <span className="font-normal text-gray-300">Informal Economy</span>
+            </p>
+            <p className="text-sm text-gray-400 leading-relaxed max-w-sm">
+              Join thousands of Nigerians building a secure financial future
+              through community-driven savings and cooperative power.
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side - Success Message */}
+        <div className="md:w-6/12 p-8 lg:p-12 flex flex-col justify-center items-center text-center">
+          <div className="w-20 h-20 bg-[#E0F2EB] rounded-full flex items-center justify-center mb-6">
+            <Mail className="w-10 h-10 text-ajobi-green" />
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900 mb-3">
+            Check your mail
+          </h2>
+          <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">
+            We've sent a verification link to your email address. Please click the link to verify your account and continue onboarding.
+          </p>
+          <Link
+            href="/login"
+            className="w-full sm:w-auto bg-ajobi-green hover:bg-ajobi-green-dark text-white px-10 py-3.5 rounded-xl text-sm font-bold transition-all shadow-sm flex items-center justify-center"
+          >
+            Return to Login
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl w-full bg-white rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[600px] border border-gray-100">
@@ -102,7 +152,7 @@ export default function OnboardingPage() {
               </div>
               <div className="space-y-1.5">
                 <label className="block text-[10px] font-bold tracking-wider text-gray-500 uppercase">
-                  Email (Optional)
+                  Email Address
                 </label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">

@@ -1,12 +1,16 @@
 "use client";
 
+import { Loader2, ShieldCheck } from "lucide-react";
+
 interface ProfileStepProps {
   formData: any;
   updateForm: (key: string, value: any) => void;
-  nextStep: () => void;
+  submitStep: () => void;
+  isSubmitting: boolean;
+  error: string | null;
 }
 
-export default function ProfileStep({ formData, updateForm, nextStep }: ProfileStepProps) {
+export default function ProfileStep({ formData, updateForm, submitStep, isSubmitting, error }: ProfileStepProps) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center mb-8">
@@ -31,13 +35,26 @@ export default function ProfileStep({ formData, updateForm, nextStep }: ProfileS
         ))}
       </div>
 
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-medium border border-red-100 flex items-center gap-2 mb-6">
+          <ShieldCheck className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+
       <div className="flex justify-center pt-4">
         <button 
-          onClick={nextStep}
-          disabled={!formData.profileType}
-          className="w-full sm:w-[60%] bg-ajobi-green hover:bg-ajobi-green-dark text-white px-12 py-3.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={submitStep}
+          disabled={!formData.profileType || isSubmitting}
+          className="w-full sm:w-[60%] flex justify-center items-center bg-ajobi-green hover:bg-ajobi-green-dark text-white px-12 py-3.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" /> Saving...
+            </>
+          ) : (
+            "Continue"
+          )}
         </button>
       </div>
     </div>

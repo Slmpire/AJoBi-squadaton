@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -20,9 +22,7 @@ export const registrationSchema = yup.object().shape({
   email: yup
     .string()
     .email("Must be a valid email address")
-    .nullable()
-    .defined()
-    .transform((value) => (value === "" ? null : value)),
+    .required("Email is required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -37,6 +37,7 @@ export type RegistrationFormValues = yup.InferType<typeof registrationSchema>;
 
 export const useRegistrationForm = () => {
   const router = useRouter();
+  const [isSuccess, setIsSuccess] = useState(false);
 
   const {
     register,
@@ -64,7 +65,7 @@ export const useRegistrationForm = () => {
         localStorage.setItem("token", response.data.token);
       }
 
-      router.push("/setup");
+      setIsSuccess(true);
     } catch (error: any) {
       console.error("Registration process aborted", error);
       
@@ -105,5 +106,6 @@ export const useRegistrationForm = () => {
     handleSubmit: handleSubmit(onSubmit),
     errors,
     isSubmitting,
+    isSuccess,
   };
 };

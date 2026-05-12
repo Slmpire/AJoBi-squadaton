@@ -1,16 +1,18 @@
 "use client";
 
-import { Check, ChevronDown } from "lucide-react";
+import { Check, ChevronDown, Loader2, ShieldCheck } from "lucide-react";
 
 interface SavingsStepProps {
   formData: any;
   updateForm: (key: string, value: any) => void;
   toggleArrayItem: (key: string, value: string) => void;
-  nextStep: () => void;
+  submitStep: () => void;
   prevStep: () => void;
+  isSubmitting: boolean;
+  error: string | null;
 }
 
-export default function SavingsStep({ formData, updateForm, toggleArrayItem, nextStep, prevStep }: SavingsStepProps) {
+export default function SavingsStep({ formData, updateForm, toggleArrayItem, submitStep, prevStep, isSubmitting, error }: SavingsStepProps) {
   return (
     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="text-center mb-8">
@@ -85,6 +87,13 @@ export default function SavingsStep({ formData, updateForm, toggleArrayItem, nex
         </div>
       </div>
 
+      {error && (
+        <div className="bg-red-50 text-red-600 p-3 rounded-xl text-xs font-medium border border-red-100 flex items-center gap-2 mb-6">
+          <ShieldCheck className="w-4 h-4" />
+          {error}
+        </div>
+      )}
+
       <div className="flex justify-between items-center pt-4">
         <button 
           onClick={prevStep}
@@ -93,11 +102,17 @@ export default function SavingsStep({ formData, updateForm, toggleArrayItem, nex
           Back
         </button>
         <button 
-          onClick={nextStep}
-          disabled={!formData.inAjoGroup || formData.saveMethods.length === 0}
-          className="w-[60%] sm:w-[50%] bg-ajobi-green hover:bg-ajobi-green-dark text-white py-3.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={submitStep}
+          disabled={!formData.inAjoGroup || formData.saveMethods.length === 0 || isSubmitting}
+          className="w-[60%] sm:w-[50%] flex justify-center items-center bg-ajobi-green hover:bg-ajobi-green-dark text-white py-3.5 rounded-lg text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Continue
+          {isSubmitting ? (
+            <>
+              <Loader2 className="animate-spin mr-2 h-4 w-4" /> Saving...
+            </>
+          ) : (
+            "Continue"
+          )}
         </button>
       </div>
     </div>

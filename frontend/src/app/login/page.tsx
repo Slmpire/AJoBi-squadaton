@@ -63,21 +63,21 @@ export default function LoginPage() {
             {/* Email / Phone Field */}
             <div className="space-y-1.5">
               <label className="block text-[10px] font-bold tracking-wider text-gray-500 uppercase">
-                Phone Number or Email
+                Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
-                  <User className={`h-4 w-4 ${errors.identifier ? 'text-red-400' : 'text-gray-400'}`} />
+                  <User className={`h-4 w-4 ${errors.email ? 'text-red-400' : 'text-gray-400'}`} />
                 </div>
                 <input
                   type="text"
-                  {...register("identifier")}
-                  className={`block w-full pl-10 pr-4 py-3 bg-[#EEF2EF] border ${errors.identifier ? 'border-red-300 focus:border-red-500' : 'border-transparent focus:border-ajobi-green'} rounded-xl text-sm focus:bg-white focus:ring-1 focus:ring-opacity-50 transition-colors`}
+                  {...register("email")}
+                  className={`block w-full pl-10 pr-4 py-3 bg-[#EEF2EF] border ${errors.email ? 'border-red-300 focus:border-red-500' : 'border-transparent focus:border-ajobi-green'} rounded-xl text-sm focus:bg-white focus:ring-1 focus:ring-opacity-50 transition-colors`}
                   placeholder="e.g. 08012345678"
                 />
               </div>
-              {errors.identifier && (
-                <p className="text-[10px] text-red-600 font-medium pl-1">{errors.identifier.message}</p>
+              {errors.email && (
+                <p className="text-[10px] text-red-600 font-medium pl-1">{errors.email.message}</p>
               )}
             </div>
 

@@ -60,7 +60,7 @@ export const authService = {
     const headers = getXsrfHeader(csrfResponse);
 
     const response = await apiClient.post<LoginResponse>('/api/auth/login', {
-      phone: credentials.identifier, 
+      email: credentials.email, 
       password: credentials.password
     }, { headers });
 
