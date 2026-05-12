@@ -12,6 +12,29 @@ export interface AuthResponse {
   token?: string;
 }
 
+export interface LoginResponse {
+  success: boolean;
+  data: {
+    user_id: string;
+    full_name: string;
+    token: string;
+    ajo_score: number;
+    score_tier: string;
+    onboarding_complete: boolean;
+  };
+}
+
+export interface RegisterResponse {
+  success: boolean;
+  data: {
+    user_id: string;
+    full_name: string;
+    phone: string;
+    token: string;
+    onboarding_complete: boolean;
+  };
+}
+
 /**
  * Ensures a CSRF cookie is requested from Laravel Sanctum.
  */
@@ -32,12 +55,12 @@ export const authService = {
   /**
    * Submits user credentials to authenticate using Laravel Sanctum.
    */
-  login: async (credentials: LoginFormValues): Promise<AuthResponse> => {
+  login: async (credentials: LoginFormValues): Promise<LoginResponse> => {
     const csrfResponse = await getCsrfCookie();
     const headers = getXsrfHeader(csrfResponse);
 
-    const response = await apiClient.post<AuthResponse>('/api/login', {
-      email: credentials.identifier, 
+    const response = await apiClient.post<LoginResponse>('/api/auth/login', {
+      phone: credentials.identifier, 
       password: credentials.password
     }, { headers });
 
@@ -47,17 +70,21 @@ export const authService = {
   /**
    * Registers a new user account using Laravel Sanctum.
    */
-  register: async (data: RegistrationFormValues): Promise<AuthResponse> => {
+  register: async (data: RegistrationFormValues): Promise<RegisterResponse> => {
     const csrfResponse = await getCsrfCookie();
     const headers = getXsrfHeader(csrfResponse);
 
-    const response = await apiClient.post<AuthResponse>('/api/register', {
-      name: data.fullName,
+    const payload: any = {
+      full_name: data.fullName,
       phone: data.phoneNumber,
-      email: data.email,
-      password: data.password,
-      password_confirmation: data.confirmPassword
-    }, { headers });
+      password: data.password
+    };
+    
+    if (data.email) {
+      payload.email = data.email;
+    }
+
+    const response = await apiClient.post<RegisterResponse>('/api/auth/register', payload, { headers });
 
     return response.data;
   },

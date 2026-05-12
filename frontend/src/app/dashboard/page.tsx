@@ -1,125 +1,184 @@
-import { ArrowUpRight, TrendingUp, Users, ArrowDownRight, Clock, ShieldCheck } from "lucide-react";
+import { 
+  TrendingUp, 
+  Users, 
+  ShieldCheck, 
+  Store, 
+  UserPlus, 
+  CreditCard,
+  ShoppingCart,
+  Banknote,
+  Eye,
+  Star
+} from "lucide-react";
+import Link from "next/link";
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Welcome back, Boluwatife 👋</h1>
-          <p className="text-sm text-gray-500 mt-1">Here's what's happening with your finances today.</p>
-        </div>
-        <button className="bg-ajobi-green hover:bg-ajobi-green-dark text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm flex items-center gap-2">
-          + Add Funds
-        </button>
-      </div>
-
-      {/* Top Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Total Balance */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center">
-              <span className="text-ajobi-green font-bold text-lg">₦</span>
+    <div className="space-y-8">
+      {/* Your Financial Credibility */}
+      <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col md:flex-row gap-8 items-center border border-gray-100">
+        <div className="w-full md:w-5/12">
+          <div className="bg-[#006C49] rounded-2xl p-6 flex flex-col items-center justify-center text-white relative overflow-hidden">
+            <div className="bg-white/20 px-4 py-1.5 rounded-full text-xs font-semibold tracking-wider mb-4 uppercase">
+              Your Ajoscore Result
             </div>
-            <span className="flex items-center text-green-600 text-sm font-medium bg-green-50 px-2 py-1 rounded-md">
-              <ArrowUpRight className="w-3 h-3 mr-1" /> +12.5%
-            </span>
+            <div className="flex items-baseline gap-1 mb-4">
+              <span className="text-6xl font-light tracking-tight">650</span>
+              <span className="text-xl text-white/80 font-light">/ 900</span>
+            </div>
+            <div className="bg-indigo-100 text-indigo-900 px-4 py-1.5 rounded-full text-sm font-bold flex items-center gap-1.5">
+              <Star className="w-4 h-4 fill-indigo-900" /> Silver Tier
+            </div>
           </div>
-          <p className="text-sm text-gray-500 font-medium mb-1">Total Balance</p>
-          <h3 className="text-3xl font-bold text-gray-900">₦245,000<span className="text-gray-400 text-xl">.00</span></h3>
-        </div>
-
-        {/* AjoScore */}
-        <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-6 rounded-2xl shadow-sm border border-indigo-500 text-white relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-20">
-            <TrendingUp className="w-24 h-24" />
-          </div>
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-4">
-              <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                <ShieldCheck className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-indigo-100 text-xs font-bold uppercase tracking-wider bg-white/20 px-2 py-1 rounded-md">
-                Excellent
-              </span>
-            </div>
-            <p className="text-sm text-indigo-100 font-medium mb-1">Your AjoScore</p>
-            <div className="flex items-end gap-2">
-              <h3 className="text-3xl font-bold">842</h3>
-              <span className="text-indigo-200 mb-1">/ 900</span>
-            </div>
-            <div className="mt-4 h-1.5 w-full bg-indigo-900/50 rounded-full overflow-hidden">
-              <div className="h-full bg-white rounded-full w-[90%]"></div>
-            </div>
+          <div className="mt-4 text-center text-sm font-medium text-[#006C49] flex items-center justify-center gap-1">
+            <TrendingUp className="w-4 h-4" /> +12 pts since last week
           </div>
         </div>
-
-        {/* Active Groups */}
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <div className="flex justify-between items-start mb-4">
-            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
-              <Users className="w-5 h-5 text-blue-600" />
-            </div>
+        <div className="w-full md:w-7/12 md:pr-4">
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Your Financial Credibility</h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">
+            Your savings consistency is strong. Add transaction history to grow faster. A higher score unlocks lower interest rates on loans and premium Ajo group invitations.
+          </p>
+          <div className="flex flex-wrap gap-4">
+            <button className="bg-[#006C49] hover:bg-[#005a3d] text-white px-6 py-2.5 rounded-lg font-medium transition-colors shadow-sm">
+              Boost My Score
+            </button>
+            <button className="border border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-2.5 rounded-lg font-medium transition-colors">
+              View Report
+            </button>
           </div>
-          <p className="text-sm text-gray-500 font-medium mb-1">Active Ajo Groups</p>
-          <h3 className="text-3xl font-bold text-gray-900">3</h3>
-          <p className="text-sm text-gray-500 mt-2">Next payout in <span className="font-semibold text-gray-900">4 days</span></p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Transactions */}
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex justify-between items-center">
-            <h3 className="font-bold text-gray-900">Recent Activity</h3>
-            <button className="text-sm font-medium text-ajobi-green hover:underline">View all</button>
+      {/* Quick Actions */}
+      <div>
+        <h3 className="font-bold text-gray-900 text-lg mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <button className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-4 hover:shadow-md hover:border-ajobi-green/30 transition-all group">
+            <div className="w-12 h-12 bg-ajobi-light rounded-xl flex items-center justify-center text-ajobi-green group-hover:scale-110 transition-transform">
+              <UserPlus className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-medium text-gray-800">Join an Ajo Group</span>
+          </button>
+          <button className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-4 hover:shadow-md hover:border-ajobi-green/30 transition-all group">
+            <div className="w-12 h-12 bg-ajobi-light rounded-xl flex items-center justify-center text-ajobi-green group-hover:scale-110 transition-transform">
+              <Store className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-medium text-gray-800">Post a Listing</span>
+          </button>
+          <button className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-4 hover:shadow-md hover:border-ajobi-green/30 transition-all group">
+            <div className="w-12 h-12 bg-ajobi-light rounded-xl flex items-center justify-center text-ajobi-green group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-medium text-gray-800">Create an Escrow</span>
+          </button>
+          <button className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center justify-center gap-4 hover:shadow-md hover:border-ajobi-green/30 transition-all group">
+            <div className="w-12 h-12 bg-ajobi-light rounded-xl flex items-center justify-center text-ajobi-green group-hover:scale-110 transition-transform">
+              <CreditCard className="w-6 h-6" />
+            </div>
+            <span className="text-sm font-medium text-gray-800">Loan Eligibility</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Active Overview Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Active Ajo Groups */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Ajo Groups</span>
+            <Users className="w-5 h-5 text-ajobi-green" />
           </div>
-          <div className="p-0">
-            <ul className="divide-y divide-gray-100">
-              {[
-                { name: "Balogun Market Ajo", type: "Contribution", amount: "-₦5,000", date: "Today, 9:00 AM", icon: ArrowDownRight, color: "text-red-500", bg: "bg-red-50" },
-                { name: "Loan Repayment", type: "Credit Service", amount: "-₦12,500", date: "Yesterday", icon: ArrowDownRight, color: "text-red-500", bg: "bg-red-50" },
-                { name: "Ikeja Traders Fund", type: "Payout Received", amount: "+₦150,000", date: "Oct 12, 2026", icon: ArrowUpRight, color: "text-green-500", bg: "bg-green-50" },
-                { name: "Wallet Top-up", type: "Bank Transfer", amount: "+₦20,000", date: "Oct 10, 2026", icon: ArrowUpRight, color: "text-green-500", bg: "bg-green-50" },
-              ].map((tx, i) => (
-                <li key={i} className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${tx.bg}`}>
-                      <tx.icon className={`w-5 h-5 ${tx.color}`} />
-                    </div>
-                    <div>
-                      <p className="font-medium text-gray-900 text-sm">{tx.name}</p>
-                      <p className="text-xs text-gray-500">{tx.type}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className={`font-semibold text-sm ${tx.color === 'text-green-500' ? 'text-green-600' : 'text-gray-900'}`}>{tx.amount}</p>
-                    <p className="text-xs text-gray-500 flex items-center gap-1 justify-end mt-0.5">
-                      <Clock className="w-3 h-3" /> {tx.date}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ul>
+          <h4 className="font-medium text-gray-900">Sunshine Group</h4>
+          <p className="text-xs text-gray-500 mb-4">Next: Friday, Oct 25</p>
+          <div className="flex justify-between items-end mt-2">
+            <span className="bg-ajobi-light text-ajobi-green text-xs px-2.5 py-1 rounded-md font-medium">Paid</span>
+            <span className="font-bold text-gray-900">₦50,000/mo</span>
           </div>
         </div>
 
-        {/* Quick Actions & Payouts */}
-        <div className="space-y-6">
-          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-            <h3 className="font-bold text-gray-900 mb-4">Upcoming Payouts</h3>
-            <div className="space-y-4">
-              <div className="bg-ajobi-light p-4 rounded-xl border border-ajobi-green/20">
-                <div className="flex justify-between items-start mb-2">
-                  <span className="text-xs font-bold text-ajobi-green uppercase tracking-wider">In 4 days</span>
-                  <span className="text-sm font-bold text-gray-900">₦250,000</span>
-                </div>
-                <h4 className="font-medium text-gray-900 text-sm">Balogun Market Ajo</h4>
-                <div className="w-full bg-white rounded-full h-1.5 mt-3">
-                  <div className="bg-ajobi-green h-1.5 rounded-full w-[85%]"></div>
-                </div>
+        {/* Active Escrows */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+          <div className="flex justify-between items-center mb-4">
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Escrows</span>
+            <ShieldCheck className="w-5 h-5 text-ajobi-green" />
+          </div>
+          <h4 className="font-medium text-gray-900">Emeka's Logo Design</h4>
+          <p className="text-xs text-gray-500 mb-4">Status: In Progress</p>
+          <div className="flex justify-between items-end mt-2">
+            <span className="font-bold text-ajobi-green">₦25,000</span>
+            <Link href="#" className="text-sm font-medium text-ajobi-green hover:underline">Details</Link>
+          </div>
+        </div>
+
+        {/* Active Instalments */}
+        <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between">
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Active Instalments</span>
+              <ShoppingCart className="w-5 h-5 text-ajobi-green" />
+            </div>
+            <h4 className="font-medium text-gray-900">Deep Freezer</h4>
+            <p className="text-xs text-gray-500 mb-4">60% Complete</p>
+          </div>
+          <div className="mt-2">
+            <div className="w-full h-1.5 bg-gray-100 rounded-full mb-1">
+              <div className="h-full bg-ajobi-green rounded-full w-[60%]"></div>
+            </div>
+            <div className="flex justify-between items-center text-xs mt-1">
+              <span className="font-bold text-gray-900">₦120k</span>
+              <span className="text-gray-500">/ ₦200k</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Recent Activity */}
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+        <h3 className="font-bold text-gray-900 text-lg mb-6">Recent Activity</h3>
+        <div className="space-y-5">
+          {/* Item 1 */}
+          <div className="flex items-start justify-between">
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-ajobi-light flex items-center justify-center shrink-0">
+                <Banknote className="w-5 h-5 text-ajobi-green" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">Contribution collected ₦10,000</p>
+                <p className="text-sm text-gray-500">Sunshine Group • Monthly Cycle</p>
               </div>
             </div>
+            <span className="text-sm text-gray-500 pt-1">2h ago</span>
+          </div>
+          <div className="w-full h-px bg-gray-100"></div>
+          
+          {/* Item 2 */}
+          <div className="flex items-start justify-between">
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-ajobi-light flex items-center justify-center shrink-0">
+                <TrendingUp className="w-5 h-5 text-ajobi-green" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">AjoScore updated +2 points</p>
+                <p className="text-sm text-gray-500">on-time contribution reward</p>
+              </div>
+            </div>
+            <span className="text-sm text-gray-500 pt-1">2h ago</span>
+          </div>
+          <div className="w-full h-px bg-gray-100"></div>
+          
+          {/* Item 3 */}
+          <div className="flex items-start justify-between">
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                <Eye className="w-5 h-5 text-gray-500" />
+              </div>
+              <div>
+                <p className="font-medium text-gray-900">New listing viewed</p>
+                <p className="text-sm text-gray-500">Ankara fabric set • Marketplace</p>
+              </div>
+            </div>
+            <span className="text-sm text-gray-500 pt-1">yesterday</span>
           </div>
         </div>
       </div>

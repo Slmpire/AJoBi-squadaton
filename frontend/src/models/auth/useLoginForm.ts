@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { authService } from "@/services/authService";
+import { isAxiosError } from "axios";
 
 export const loginSchema = yup.object().shape({
   identifier: yup
@@ -38,26 +39,32 @@ export const useLoginForm = () => {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      // --- API INTEGRATION READY ---
-      // Uncomment the lines below to use the real API instead of the simulation
+      const response = await authService.login(data);
+      console.log("Login successful:", response);
       
-      // const response = await authService.login(data);
-      // console.log("Login successful:", response);
-      // localStorage.setItem("token", response.token);
+      if (response.data && response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
 
-      // --- SIMULATION (Remove when backend is ready) ---
-      console.log("Submitting Login Payload:", data);
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      // ----------------------------------------------
-
-      router.push("/dashboard");
+      if (response.data.onboarding_complete === false) {
+        router.push("/setup");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (error: any) {
       console.error("Authentication failed", error);
       
+      let errorMessage = "Invalid credentials. Please try again.";
+      
+      if (isAxiosError(error) && error.response?.data?.error) {
+        const apiError = error.response.data.error;
+        errorMessage = apiError.message || errorMessage;
+      }
+
       // Set a form-level error to be displayed in the UI
       setError("root", {
         type: "server",
-        message: error?.message || "Invalid credentials. Please try again.",
+        message: errorMessage,
       });
     }
   };

@@ -4,17 +4,19 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
+import { authService } from "@/services/authService";
+import { isAxiosError } from "axios";
 
 
 export const registrationSchema = yup.object().shape({
   fullName: yup
     .string()
     .required("Full name is required")
-    .min(3, "Name must be at least 3 characters"),
+    .min(2, "Name must be at least 2 characters"),
   phoneNumber: yup
     .string()
     .required("Phone number is required")
-    .matches(/^[+]?[0-9]{10,15}$/, "Invalid phone number format"),
+    .matches(/^(\+234|0)[789][01]\d{8}$/, "Must be a valid Nigerian phone number"),
   email: yup
     .string()
     .email("Must be a valid email address")
@@ -23,7 +25,7 @@ export const registrationSchema = yup.object().shape({
     .transform((value) => (value === "" ? null : value)),
   password: yup
     .string()
-    .min(8, "Password must be at least 8 characters")
+    .min(6, "Password must be at least 6 characters")
     .required("Password is required"),
   confirmPassword: yup
     .string()
@@ -55,26 +57,45 @@ export const useRegistrationForm = () => {
 
   const onSubmit = async (data: RegistrationFormValues) => {
     try {
-      // --- API INTEGRATION READY ---
-      // Uncomment the lines below to use the real API instead of the simulation
+      const response = await authService.register(data);
+      console.log("Registration successful:", response);
       
-      // const response = await authService.register(data);
-      // console.log("Registration successful:", response);
-      // localStorage.setItem("token", response.token);
-
-      // --- SIMULATION (Remove when backend is ready) ---
-      console.log("Submitting Registration Payload:", data);
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      // ----------------------------------------------
+      if (response.data && response.data.token) {
+        localStorage.setItem("token", response.data.token);
+      }
 
       router.push("/setup");
     } catch (error: any) {
       console.error("Registration process aborted", error);
       
+      let errorMessage = "Registration failed. Please try again.";
+      
+      if (isAxiosError(error) && error.response?.data?.error) {
+        const apiError = error.response.data.error;
+        errorMessage = apiError.message || errorMessage;
+        
+        if (apiError.code === "PHONE_EXISTS") {
+          setError("phoneNumber", {
+            type: "server",
+            message: errorMessage,
+          });
+          return;
+        } else if (apiError.code === "VALIDATION_ERROR") {
+          // If the message specifically mentions phone number
+          if (errorMessage.toLowerCase().includes("phone")) {
+             setError("phoneNumber", {
+               type: "server",
+               message: errorMessage,
+             });
+             return;
+          }
+        }
+      }
+
       // Set a form-level error to be displayed in the UI
       setError("root", {
         type: "server",
-        message: error?.message || "Registration failed. Please try again.",
+        message: errorMessage,
       });
     }
   };
