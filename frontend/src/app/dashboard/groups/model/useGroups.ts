@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { groupsService } from "@/services/groupsService";
 
 export interface GroupItem {
   id: string;
@@ -17,8 +18,8 @@ export interface PublicGroup {
   name: string;
   admin: string;
   amount: string;
-  rawAmount: number; // added for computational parsing
-  frequency: "Monthly" | "Weekly" | "Bi-Weekly"; // added for computational filtering
+  rawAmount: number;
+  frequency: "Monthly" | "Weekly" | "Bi-Weekly";
   slots: string;
   minScore: number;
   locked?: boolean;
@@ -37,19 +38,25 @@ export interface MatchedGroup {
 export const useGroups = () => {
   const [activeTab, setActiveTab] = useState<'my' | 'browse' | 'match'>('my');
   
-  // Advanced Search & Filter states for Public Groups
+  // Search & States
   const [searchFilter, setSearchFilter] = useState("");
   const [amountFilter, setAmountFilter] = useState("Any");
   const [frequencyFilter, setFrequencyFilter] = useState("Any");
 
-  // Search and Matching states for AI Matching
+  // Matching Engine states
   const [searchQuery, setSearchQuery] = useState("");
   const [matchAmount, setMatchAmount] = useState("50,000");
   const [matchFrequency, setMatchFrequency] = useState<'Monthly' | 'Weekly'>('Monthly');
   const [isMatching, setIsMatching] = useState(false);
   const [showMatches, setShowMatches] = useState(false);
 
-  const myGroups: GroupItem[] = [
+  // Live API States
+  const [myGroups, setMyGroups] = useState<GroupItem[]>([]);
+  const [publicGroups, setPublicGroups] = useState<PublicGroup[]>([]);
+  const [matchedGroups, setMatchedGroups] = useState<MatchedGroup[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const fallbackMyGroups: GroupItem[] = [
     {
       id: "1",
       name: "Lagos Techies",
@@ -94,7 +101,7 @@ export const useGroups = () => {
     }
   ];
 
-  const publicGroups: PublicGroup[] = [
+  const fallbackPublicGroups: PublicGroup[] = [
     {
       id: "101",
       name: "Tunde's Elite Circle",
@@ -149,34 +156,7 @@ export const useGroups = () => {
     }
   ];
 
-  // Computed search and filtering logic
-  const filteredPublicGroups = useMemo(() => {
-    return publicGroups.filter(group => {
-      // 1. Match string query
-      if (searchFilter) {
-        const lower = searchFilter.toLowerCase();
-        const matchesName = group.name.toLowerCase().includes(lower);
-        const matchesAdmin = group.admin.toLowerCase().includes(lower);
-        if (!matchesName && !matchesAdmin) return false;
-      }
-
-      // 2. Match frequency constraint
-      if (frequencyFilter !== "Any") {
-        if (group.frequency !== frequencyFilter) return false;
-      }
-
-      // 3. Match numeric ranges
-      if (amountFilter !== "Any") {
-        if (amountFilter === "Under ₦50k" && group.rawAmount >= 50000) return false;
-        if (amountFilter === "₦50k - ₦200k" && (group.rawAmount < 50000 || group.rawAmount > 200000)) return false;
-        if (amountFilter === "Above ₦200k" && group.rawAmount <= 200000) return false;
-      }
-
-      return true;
-    });
-  }, [searchFilter, amountFilter, frequencyFilter]);
-
-  const matchedGroups: MatchedGroup[] = [
+  const fallbackMatchedGroups: MatchedGroup[] = [
     {
       id: "201",
       name: "Growth Circle #04",
@@ -203,20 +183,128 @@ export const useGroups = () => {
     }
   ];
 
+  // Initialize API calls
+  useEffect(() => {
+    const fetchAllGroups = async () => {
+      setIsLoading(true);
+      try {
+        // 1. Load My Groups
+        try {
+          const myResp = await groupsService.getMyGroups();
+          if (myResp.success && myResp.data?.groups) {
+            const mapped = myResp.data.groups.map((g: any) => ({
+              id: g.group_id,
+              name: g.name,
+              type: `${g.frequency.charAt(0).toUpperCase() + g.frequency.slice(1)} Contribution`,
+              contribution: `₦${g.contribution_amount.toLocaleString()}`,
+              nextPayout: new Date(g.next_contribution_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+              position: `${g.my_rotation_position} in line`,
+              status: g.my_contribution_status === 'paid' ? 'Paid' : g.my_contribution_status === 'missed' ? 'Missed' : 'Pending',
+              members: g.total_cycles, // approximation or total member spots
+              avatars: []
+            }));
+            setMyGroups(mapped);
+          } else {
+            setMyGroups(fallbackMyGroups);
+          }
+        } catch {
+          setMyGroups(fallbackMyGroups);
+        }
+
+        // 2. Load Public Groups
+        try {
+          const publicResp = await groupsService.browseGroups();
+          if (publicResp.success && publicResp.data?.groups) {
+            const mapped = publicResp.data.groups.map((g: any) => ({
+              id: g.group_id,
+              name: g.name,
+              admin: g.creator_name || "Admin",
+              amount: `₦${(g.contribution_amount / 1000)}K/${g.frequency === 'weekly' ? 'wk' : 'mo'}`,
+              rawAmount: g.contribution_amount,
+              frequency: g.frequency === 'weekly' ? 'Weekly' : 'Monthly',
+              slots: `${g.spots_remaining} of ${g.max_members} available`,
+              minScore: g.min_ajo_score,
+              locked: g.locked,
+              tierRequired: g.tier
+            }));
+            setPublicGroups(mapped);
+          } else {
+            setPublicGroups(fallbackPublicGroups);
+          }
+        } catch {
+          setPublicGroups(fallbackPublicGroups);
+        }
+
+      } catch (e) {
+        console.warn("Group fetch failover triggered", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAllGroups();
+  }, []);
+
+  // Trigger AI Match Engine
   const handleFindMatch = async () => {
     setIsMatching(true);
     setShowMatches(false);
-    await new Promise(r => setTimeout(r, 1200));
-    setIsMatching(false);
-    setShowMatches(true);
+    try {
+      const numericAmt = parseFloat(matchAmount.replace(/,/g, "")) || 10000;
+      const resp = await groupsService.autoMatchGroup({
+        contribution_amount: numericAmt,
+        frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly'
+      });
+
+      if (resp.success && resp.data?.matches) {
+        const mapped = resp.data.matches.map((m: any) => ({
+          id: m.match_id,
+          name: `Match ${m.match_id.split('_')[1] || 'Circle'}`,
+          matchRate: m.compatibility_score,
+          description: `Estimated to launch on ${new Date(m.estimated_start_date).toLocaleDateString()}.`,
+          amount: `₦${m.contribution_amount.toLocaleString()}/${m.frequency === 'weekly' ? 'wk' : 'mo'}`,
+          members: `${m.proposed_members?.length || 0} Members`
+        }));
+        setMatchedGroups(mapped);
+      } else {
+        setMatchedGroups(fallbackMatchedGroups);
+      }
+    } catch {
+      setMatchedGroups(fallbackMatchedGroups);
+    } finally {
+      setIsMatching(false);
+      setShowMatches(true);
+    }
   };
 
+  // Computational Client Filters on dynamic state payload
+  const filteredPublicGroups = useMemo(() => {
+    return publicGroups.filter(group => {
+      if (searchFilter) {
+        const lower = searchFilter.toLowerCase();
+        const matchesName = group.name.toLowerCase().includes(lower);
+        const matchesAdmin = group.admin.toLowerCase().includes(lower);
+        if (!matchesName && !matchesAdmin) return false;
+      }
+      if (frequencyFilter !== "Any") {
+        if (group.frequency !== frequencyFilter) return false;
+      }
+      if (amountFilter !== "Any") {
+        if (amountFilter === "Under ₦50k" && group.rawAmount >= 50000) return false;
+        if (amountFilter === "₦50k - ₦200k" && (group.rawAmount < 50000 || group.rawAmount > 200000)) return false;
+        if (amountFilter === "Above ₦200k" && group.rawAmount <= 200000) return false;
+      }
+      return true;
+    });
+  }, [publicGroups, searchFilter, amountFilter, frequencyFilter]);
+
   return {
+    isLoading,
     activeTab,
     setActiveTab,
     myGroups,
-    publicGroups: filteredPublicGroups, // replace plain list with reactive computational results
-    matchedGroups,
+    publicGroups: filteredPublicGroups,
+    matchedGroups: showMatches ? matchedGroups : fallbackMatchedGroups,
     searchQuery,
     setSearchQuery,
     searchFilter,
