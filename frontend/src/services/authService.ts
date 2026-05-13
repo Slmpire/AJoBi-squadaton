@@ -35,45 +35,28 @@ export interface RegisterResponse {
   };
 }
 
-/**
- * Ensures a CSRF cookie is requested from Laravel Sanctum.
- */
-export const getCsrfCookie = async () => {
-  return await apiClient.get('/sanctum/csrf-cookie');
-};
-
-/**
- * Helper to safely extract the XSRF token header.
- */
-const getXsrfHeader = (csrfResponse: any) => {
-  const token = csrfResponse.headers["x-xsrf-token"] || 
-               (typeof document !== 'undefined' && document.cookie.match(/XSRF-TOKEN=([^;]+)/)?.[1]);
-  return token ? { "X-XSRF-TOKEN": decodeURIComponent(token) } : {};
-};
-
 export const authService = {
   /**
-   * Submits user credentials to authenticate using Laravel Sanctum.
+   * Submits user credentials to authenticate and retrieves a Bearer token.
    */
   login: async (credentials: LoginFormValues): Promise<LoginResponse> => {
-    const csrfResponse = await getCsrfCookie();
-    const headers = getXsrfHeader(csrfResponse);
-
     const response = await apiClient.post<LoginResponse>('/api/auth/login', {
       email: credentials.email, 
       password: credentials.password
-    }, { headers });
+    });
+    console.log(response);
+
+    if (response.data.success && response.data.data.token) {
+      localStorage.setItem('token', response.data.data.token);
+    }
 
     return response.data;
   },
 
   /**
-   * Registers a new user account using Laravel Sanctum.
+   * Registers a new user account and retrieves a Bearer token.
    */
   register: async (data: RegistrationFormValues): Promise<RegisterResponse> => {
-    const csrfResponse = await getCsrfCookie();
-    const headers = getXsrfHeader(csrfResponse);
-
     const payload: any = {
       full_name: data.fullName,
       phone: data.phoneNumber,
@@ -84,7 +67,11 @@ export const authService = {
       payload.email = data.email;
     }
 
-    const response = await apiClient.post<RegisterResponse>('/api/auth/register', payload, { headers });
+    const response = await apiClient.post<RegisterResponse>('/api/auth/register', payload);
+
+    if (response.data.success && response.data.data.token) {
+      localStorage.setItem('token', response.data.data.token);
+    }
 
     return response.data;
   },
