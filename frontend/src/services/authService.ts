@@ -20,7 +20,7 @@ export interface LoginResponse {
     token: string;
     ajo_score: number;
     score_tier: string;
-    onboarding_complete: boolean;
+    onboarding_complete: "true" | "false";
   };
 }
 

@@ -65,6 +65,7 @@ export const useRegistrationForm = () => {
         localStorage.setItem("token", response.data.token);
       }
 
+      
       setIsSuccess(true);
     } catch (error: any) {
       console.error("Registration process aborted", error);

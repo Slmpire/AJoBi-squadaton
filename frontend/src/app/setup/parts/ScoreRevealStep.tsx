@@ -1,9 +1,18 @@
 "use client";
 
-import { Star, TrendingUp, Wallet, Gauge, Users, ShieldCheck, Sparkles } from "lucide-react";
+import { Star, TrendingUp, Wallet, Gauge, Users, ShieldCheck, Sparkles, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { SetupFinalResponse } from "@/services/setupService";
 
-export default function ScoreRevealStep() {
+interface ScoreRevealStepProps {
+  scoreData: SetupFinalResponse['data'] | null;
+}
+
+export default function ScoreRevealStep({ scoreData }: ScoreRevealStepProps) {
+  const score = scoreData?.ajo_score || 0;
+  const tier = scoreData?.score_tier || "Bronze";
+  const explanation = scoreData?.explanation || "Keep using AjoBI to build your score.";
+  const tips = scoreData?.improvement_tips || [];
   return (
     <div className="animate-in fade-in zoom-in-95 duration-700 w-full mx-auto pb-10">
       <div className="flex flex-col md:flex-row gap-6 mb-8 items-stretch">
@@ -20,18 +29,18 @@ export default function ScoreRevealStep() {
                Your Ajoscore Result
              </span>
              <div className="flex items-baseline gap-2 mb-5">
-               <span className="text-6xl sm:text-7xl font-bold tracking-tighter">650</span>
+               <span className="text-6xl sm:text-7xl font-bold tracking-tighter">{score}</span>
                <span className="text-xl sm:text-2xl text-white/70 font-medium">/ 900</span>
              </div>
              <div className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-[#EAEFFF] text-[#4F46E5] rounded-full text-xs font-bold shadow-sm">
-               <Star className="w-3.5 h-3.5 fill-[#4F46E5]" /> Silver Tier
+               <Star className="w-3.5 h-3.5 fill-[#4F46E5]" /> {tier} Tier
              </div>
            </div>
 
            <div className="mt-8 text-center px-4 w-full">
-             <h2 className="text-[22px] font-bold text-gray-900 mb-3 tracking-tight">Great Start, Amaka!</h2>
+             <h2 className="text-[22px] font-bold text-gray-900 mb-3 tracking-tight">Great Start!</h2>
              <p className="text-[13px] text-gray-500 leading-relaxed max-w-sm mx-auto">
-               Your AjoScore of 650 reflects consistent saving habits and strong community ties. You are performing better than 72% of new members.
+               {explanation}
              </p>
            </div>
         </div>
@@ -41,14 +50,17 @@ export default function ScoreRevealStep() {
           <div className="mb-6">
             <TrendingUp className="w-8 h-8 text-white" />
           </div>
-          <h3 className="text-[22px] font-bold mb-3 tracking-tight">Pathway to Gold</h3>
-          <p className="text-[13px] text-white/80 leading-relaxed mb-8">
-            Earn 50 more points by completing your next two savings cycles on time.
-          </p>
-          <div className="w-full bg-black/20 rounded-full h-2.5 overflow-hidden">
-            <div className="bg-white w-[65%] h-full rounded-full relative">
-               <div className="absolute right-0 top-0 bottom-0 w-4 bg-white/50 blur-[2px]" />
-            </div>
+          <h3 className="text-[22px] font-bold mb-3 tracking-tight">How to Improve</h3>
+          <div className="space-y-4 mb-6">
+            {tips.map((tip, idx) => (
+              <div key={idx} className="flex items-start gap-2">
+                <CheckCircle2 className="w-4 h-4 text-[#00BA75] shrink-0 mt-0.5" />
+                <p className="text-[13px] text-white/80 leading-snug">{tip}</p>
+              </div>
+            ))}
+            {tips.length === 0 && (
+              <p className="text-[13px] text-white/80">Keep up your good financial habits.</p>
+            )}
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import ProgressBar from "./parts/ProgressBar";
 import ProfileStep from "./parts/ProfileStep";
@@ -22,6 +23,8 @@ export default function SetupWizard() {
     nextStep,
     prevStep,
     submitStep,
+    isLoadingProgress,
+    scoreData,
   } = useSetupWizard();
 
   const renderStepContent = () => {
@@ -37,7 +40,7 @@ export default function SetupWizard() {
       case 5:
         return <FinalStep formData={formData} updateForm={updateForm} submitStep={submitStep} prevStep={prevStep} isSubmitting={isSubmitting} error={error} />;
       case 6:
-        return <ScoreRevealStep />;
+        return <ScoreRevealStep scoreData={scoreData} />;
       default:
         return null;
     }
@@ -72,16 +75,25 @@ export default function SetupWizard() {
 
       {/* Main Content */}
       <main className={`flex-grow flex flex-col items-center justify-center p-4 relative z-10 py-12 ${currentStep === 6 ? 'max-w-5xl mx-auto w-full' : ''}`}>
-        {currentStep <= 5 && <ProgressBar currentStep={currentStep} />}
-
-        {currentStep <= 5 ? (
-          <div className="max-w-[32rem] w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-10 border border-gray-100">
-            {renderStepContent()}
+        {isLoadingProgress ? (
+          <div className="flex flex-col items-center justify-center h-[60vh]">
+            <Loader2 className="w-10 h-10 text-ajobi-green animate-spin mb-4" />
+            <p className="text-sm font-medium text-gray-500">Loading your progress...</p>
           </div>
         ) : (
-          <div className="w-full">
-            {renderStepContent()}
-          </div>
+          <>
+            {currentStep <= 5 && <ProgressBar currentStep={currentStep} />}
+
+            {currentStep <= 5 ? (
+              <div className="max-w-[32rem] w-full bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] p-8 md:p-10 border border-gray-100">
+                {renderStepContent()}
+              </div>
+            ) : (
+              <div className="w-full">
+                {renderStepContent()}
+              </div>
+            )}
+          </>
         )}
       </main>
 

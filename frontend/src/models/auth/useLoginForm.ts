@@ -45,8 +45,8 @@ export const useLoginForm = () => {
       if (response.data && response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-
-      if (response.data.onboarding_complete === false) {
+      console.log(response.data.onboarding_complete)
+      if (response.data.onboarding_complete === "false") {
         router.push("/setup");
       } else {
         router.push("/dashboard");

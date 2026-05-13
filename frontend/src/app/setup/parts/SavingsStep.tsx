@@ -70,17 +70,16 @@ export default function SavingsStep({ formData, updateForm, toggleArrayItem, sub
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-medium text-gray-700">How often do you set money aside?</label>
+          <label className="text-xs font-medium text-gray-700">How consistent are your savings contributions?</label>
           <div className="relative">
             <select 
-              value={formData.saveFrequency}
-              onChange={(e) => updateForm("saveFrequency", e.target.value)}
+              value={formData.contributionConsistency}
+              onChange={(e) => updateForm("contributionConsistency", e.target.value)}
               className="w-full appearance-none px-4 py-3.5 rounded-xl border border-gray-200 text-sm text-gray-700 focus:outline-none focus:border-ajobi-green bg-[#F8FAFC]"
             >
-              <option value="Daily">Daily</option>
-              <option value="Weekly">Weekly</option>
-              <option value="Monthly">Monthly</option>
-              <option value="Rarely">Rarely</option>
+              <option value="Always on time">Always on time</option>
+              <option value="Sometimes late">Sometimes late</option>
+              <option value="Often late">Often late</option>
             </select>
             <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
