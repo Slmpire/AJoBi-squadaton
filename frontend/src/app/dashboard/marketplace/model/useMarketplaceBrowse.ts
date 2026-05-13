@@ -73,6 +73,7 @@ export const useMarketplaceBrowse = () => {
     setError(null);
     try {
       const response = await marketplaceService.browseListings(params);
+      console.log(response);
       if (response.success && response.data.listings) {
         setListings(response.data.listings);
       }
