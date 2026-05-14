@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Upload, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, Upload, Check, Loader2, X, Plus, Image as ImageIcon } from "lucide-react";
 import Link from "next/link";
 import { marketplaceService, CreateListingPayload } from "@/services/marketplaceService";
 
@@ -29,6 +29,9 @@ export default function CreateListingPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedImages, setSelectedImages] = useState<File[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [formData, setFormData] = useState<CreateListingPayload>({
     seller_type: "product",
@@ -57,23 +60,62 @@ export default function CreateListingPage() {
     });
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+
+    // Filter out files that are too large (5MB)
+    const validFiles = files.filter(file => file.size <= 5 * 1024 * 1024);
+    if (validFiles.length < files.length) {
+      alert("Some files were too large and were skipped (max 5MB).");
+    }
+
+    const newImages = [...selectedImages, ...validFiles];
+    setSelectedImages(newImages);
+
+    const newPreviews = validFiles.map(file => URL.createObjectURL(file));
+    setImagePreviews(prev => [...prev, ...newPreviews]);
+  };
+
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index]);
+    setSelectedImages(prev => prev.filter((_, i) => i !== index));
+    setImagePreviews(prev => prev.filter((_, i) => i !== index));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
     
     try {
-      // In a real app, images would be properly converted/uploaded first
+      // Convert images to base64 if any are selected
+      const base64Images = await Promise.all(
+        selectedImages.map(file => {
+          return new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = error => reject(error);
+          });
+        })
+      );
+
       const payloadToSubmit = {
         ...formData,
-        // Mock image if none provided
-        images: formData.images.length ? formData.images : ["https://images.unsplash.com/photo-1550614000-4b95dd247ae2?q=80&w=600&auto=format&fit=crop"]
+        user_id: sessionStorage.getItem("userId") as string,
+        images: base64Images.length ? base64Images : formData.images
       };
 
-      await marketplaceService.createListing(payloadToSubmit);
-      router.push("/dashboard/marketplace");
+      const response = await marketplaceService.createListing(payloadToSubmit);
+      console.log(response)
+      if (response.success) {
+        router.push("/dashboard/marketplace");
+      } else {
+        setError(response.error?.message || "Failed to create listing");
+      }
     } catch (err: any) {
-      setError(err?.message || "Failed to create listing. Please try again.");
+      setError(err.message || "An error occurred while creating your listing");
     } finally {
       setIsSubmitting(false);
     }
@@ -188,14 +230,68 @@ export default function CreateListingPage() {
 
         {/* Photos */}
         <div className="space-y-4">
-          <h2 className="text-[16px] font-bold text-gray-900 border-b border-[#E8EFE8] pb-3">Photos</h2>
-          <div className="border-2 border-dashed border-[#DCE8E0] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F9FCF9] transition-colors cursor-pointer group">
-            <div className="w-14 h-14 bg-[#F1F6F3] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#E8F1EB] transition-colors">
-              <Upload className="w-6 h-6 text-[#066B44]" />
-            </div>
-            <p className="text-[14px] font-bold text-gray-900 mb-1">Click to upload images</p>
-            <p className="text-[12px] text-gray-500">SVG, PNG, JPG or GIF (max. 5MB)</p>
+          <div className="flex items-center justify-between border-b border-[#E8EFE8] pb-3">
+            <h2 className="text-[16px] font-bold text-gray-900">Photos</h2>
+            <span className="text-[12px] font-medium text-gray-500">{selectedImages.length} of 5 images</span>
           </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {imagePreviews.map((preview, index) => (
+              <div key={index} className="relative aspect-square rounded-2xl overflow-hidden border border-[#E8EFE8] group shadow-sm">
+                <img 
+                  src={preview} 
+                  alt={`Preview ${index + 1}`} 
+                  className="w-full h-full object-cover"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeImage(index)}
+                  className="absolute top-2 right-2 w-7 h-7 bg-white/90 backdrop-blur-sm rounded-full flex items-center justify-center text-red-500 shadow-md hover:bg-red-500 hover:text-white transition-all scale-0 group-hover:scale-100"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+                {index === 0 && (
+                  <div className="absolute bottom-0 left-0 right-0 bg-[#066B44]/80 backdrop-blur-[2px] text-white text-[10px] font-bold py-1 text-center uppercase tracking-wider">
+                    Main Photo
+                  </div>
+                )}
+              </div>
+            ))}
+
+            {selectedImages.length < 5 && (
+              <div 
+                onClick={() => fileInputRef.current?.click()}
+                className="aspect-square border-2 border-dashed border-[#DCE8E0] rounded-2xl flex flex-col items-center justify-center text-center hover:bg-[#F9FCF9] transition-all cursor-pointer group hover:border-[#066B44]/30"
+              >
+                <div className="w-10 h-10 bg-[#F1F6F3] rounded-full flex items-center justify-center mb-2 group-hover:bg-[#E8F1EB] transition-colors">
+                  <Plus className="w-5 h-5 text-[#066B44]" />
+                </div>
+                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide">Add Photo</span>
+              </div>
+            )}
+          </div>
+
+          {selectedImages.length === 0 && (
+            <div 
+              onClick={() => fileInputRef.current?.click()}
+              className="border-2 border-dashed border-[#DCE8E0] rounded-2xl p-10 flex flex-col items-center justify-center text-center hover:bg-[#F9FCF9] transition-colors cursor-pointer group"
+            >
+              <div className="w-14 h-14 bg-[#F1F6F3] rounded-full flex items-center justify-center mb-4 group-hover:bg-[#E8F1EB] transition-colors">
+                <Upload className="w-6 h-6 text-[#066B44]" />
+              </div>
+              <p className="text-[14px] font-bold text-gray-900 mb-1">Click to upload images</p>
+              <p className="text-[12px] text-gray-500">SVG, PNG, JPG or GIF (max. 5MB)</p>
+            </div>
+          )}
+
+          <input 
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+            className="hidden"
+          />
         </div>
 
         {/* Logistics & Payment */}

@@ -30,6 +30,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     const fetchListing = async () => {
       try {
         const response = await marketplaceService.getListingDetail(id);
+        console.log("listing response", response);
         if (response.success) {
           setListing(response.data);
           if (response.data.min_instalment_count) {
@@ -39,35 +40,35 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
       } catch (err: any) {
         console.warn("API failed, using fallback data", err);
         // Fallback for demonstration
-        setListing({
-          listing_id: id,
-          seller_type: "artisan",
-          category: "Fashion & Tailoring",
-          title: "Custom Ankara Dress",
-          description: "I make custom Ankara dresses to fit. Any style, any size. 7-day turnaround. Only premium quality fabrics used.",
-          price: 25000,
-          images: [
-            "https://images.unsplash.com/photo-1550614000-4b95dd247ae2?q=80&w=1200&auto=format&fit=crop"
-          ],
-          location: "Surulere, Lagos",
-          delivery_available: true,
-          lead_time: "7-14 days",
-          allows_instalment: true,
-          min_instalment_count: 2,
-          status: "active",
-          created_at: "2024-05-29T10:00:00Z",
-          seller: {
-            user_id: "usr_001",
-            name: "Mama Ngozi",
-            photo: "https://images.unsplash.com/photo-1531123897727-8f129e1bf98c?q=80&w=256&auto=format&fit=crop",
-            ajo_score: 74,
-            score_tier: "Gold",
-            member_since: "2024-01-15T00:00:00Z",
-            completed_escrows: 34,
-            dispute_rate: "0%",
-            response_rate: "98%"
-          }
-        });
+        // setListing({
+        //   listing_id: id,
+        //   seller_type: "artisan",
+        //   category: "Fashion & Tailoring",
+        //   title: "Custom Ankara Dress",
+        //   description: "I make custom Ankara dresses to fit. Any style, any size. 7-day turnaround. Only premium quality fabrics used.",
+        //   price: 25000,
+        //   images: [
+        //     "https://images.unsplash.com/photo-1550614000-4b95dd247ae2?q=80&w=1200&auto=format&fit=crop"
+        //   ],
+        //   location: "Surulere, Lagos",
+        //   delivery_available: true,
+        //   lead_time: "7-14 days",
+        //   allows_instalment: true,
+        //   min_instalment_count: 2,
+        //   status: "active",
+        //   created_at: "2024-05-29T10:00:00Z",
+        //   seller: {
+        //     user_id: "usr_001",
+        //     name: "Mama Ngozi",
+        //     photo: "https://images.unsplash.com/photo-1531123897727-8f129e1bf98c?q=80&w=256&auto=format&fit=crop",
+        //     ajo_score: 74,
+        //     score_tier: "Gold",
+        //     member_since: "2024-01-15T00:00:00Z",
+        //     completed_escrows: 34,
+        //     dispute_rate: "0%",
+        //     response_rate: "98%"
+        //   }
+        // });
       } finally {
         setIsLoading(false);
       }

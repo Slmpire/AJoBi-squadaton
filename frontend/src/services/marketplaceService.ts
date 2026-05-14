@@ -79,7 +79,7 @@ export const marketplaceService = {
   },
 
   browseListings: async (params: BrowseListingsParams) => {
-    const response = await apiClient.get('/api/listings', { params });
+    const response = await apiClient.get('/api/listings/browse', { params });
     return response.data;
   },
 

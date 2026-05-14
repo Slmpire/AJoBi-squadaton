@@ -48,6 +48,9 @@ export const useLoginForm = () => {
     try {
       const response = await dispatch(loginUser(data)).unwrap();
       console.log("Login successful:", response);
+
+      sessionStorage.setItem("userId", response.data.user_id);
+      sessionStorage.setItem("email", response.data.email);
       
       if (response.data.onboarding_complete === "false" || response.data.onboarding_complete === false) {
         router.push("/setup");
