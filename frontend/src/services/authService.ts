@@ -12,6 +12,23 @@ export interface AuthResponse {
   token?: string;
 }
 
+export interface UserData {
+  user_id: string;
+  full_name: string;
+  phone: string;
+  email?: string;
+  occupation?: string;
+  state?: string;
+  lga?: string;
+  language?: string;
+  ajo_score: number;
+  score_tier: string;
+  profile_photo?: string;
+  onboarding_complete: boolean;
+  member_since: string;
+  squad_wallet_balance: number;
+}
+
 export interface LoginResponse {
   success: boolean;
   data: {
@@ -20,7 +37,7 @@ export interface LoginResponse {
     token: string;
     ajo_score: number;
     score_tier: string;
-    onboarding_complete: "true" | "false";
+    onboarding_complete: boolean | string;
   };
 }
 
@@ -31,7 +48,7 @@ export interface RegisterResponse {
     full_name: string;
     phone: string;
     token: string;
-    onboarding_complete: boolean;
+    onboarding_complete: boolean | string;
   };
 }
 
@@ -39,12 +56,11 @@ export const authService = {
   /**
    * Submits user credentials to authenticate and retrieves a Bearer token.
    */
-  login: async (credentials: LoginFormValues): Promise<LoginResponse> => {
+  login: async (credentials: any): Promise<LoginResponse> => {
     const response = await apiClient.post<LoginResponse>('/api/auth/login', {
-      email: credentials.email, 
+      phone: credentials.phone, 
       password: credentials.password
     });
-    console.log(response);
 
     if (response.data.success && response.data.data.token) {
       localStorage.setItem('token', response.data.data.token);
@@ -75,6 +91,14 @@ export const authService = {
 
     return response.data;
   },
+
+  /**
+   * Retrieves the current authenticated user profile.
+   */
+  getCurrentUser: async (): Promise<{ success: boolean; data: UserData }> => {
+    const response = await apiClient.get('/api/auth/me');
+    return response.data;
+  },
   
   /**
    * Cleans up local session data and terminates the backend session.
@@ -87,7 +111,6 @@ export const authService = {
         console.error("Logout failed on server", e);
       }
       localStorage.removeItem('token');
-      // Additional cleanup logic...
     }
   }
 };

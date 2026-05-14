@@ -66,7 +66,9 @@ export interface EligibilityData {
 }
 
 export const scoreService = {
-  getAjoScore: async (userId: string) => {
+  // getAjoScore: async (userId: string) => 
+  getAjoScore: async () => {
+    const userId = "user6a02f65ad51313.56219069"
     const response = await apiClient.get(`/api/score/${userId}`);
     console.log("ajo score service", response.data);
     return response.data;

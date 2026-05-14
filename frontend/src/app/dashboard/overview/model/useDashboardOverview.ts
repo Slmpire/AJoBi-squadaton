@@ -53,7 +53,7 @@ export const useDashboardOverview = () => {
   const isLoading = groupsLoading || marketplaceLoading || savingsLoading || settingsLoading || scoreLoading;
 
   useEffect(() => {
-    const userId = "user_123"; 
+    const userId = "user6a02f65ad51313.56219069"; 
     
     dispatch(fetchMyGroups());
     dispatch(fetchListings({ limit: 5 }));

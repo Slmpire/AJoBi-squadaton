@@ -8,9 +8,9 @@ import { authService } from "@/services/authService";
 import { isAxiosError } from "axios";
 
 export const loginSchema = yup.object().shape({
-  email: yup
+  phone: yup
     .string()
-    .required("Email is required"),
+    .required("Phone number is required"),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -31,7 +31,7 @@ export const useLoginForm = () => {
   } = useForm<LoginFormValues>({
     resolver: yupResolver(loginSchema),
     defaultValues: {
-      email: "",
+      phone: "",
       password: "",
       rememberMe: false,
     },
@@ -45,7 +45,7 @@ export const useLoginForm = () => {
       if (response.data && response.data.token) {
         localStorage.setItem("token", response.data.token);
       }
-      console.log(response.data.onboarding_complete)
+      
       if (response.data.onboarding_complete === "false") {
         router.push("/setup");
       } else {

@@ -22,7 +22,7 @@ export const registrationSchema = yup.object().shape({
   email: yup
     .string()
     .email("Must be a valid email address")
-    .required("Email is required"),
+    .notRequired(),
   password: yup
     .string()
     .min(6, "Password must be at least 6 characters")
@@ -65,8 +65,16 @@ export const useRegistrationForm = () => {
         localStorage.setItem("token", response.data.token);
       }
 
-      
       setIsSuccess(true);
+      
+      // Delay redirect slightly so success state can be seen if needed
+      setTimeout(() => {
+        if (response.data.onboarding_complete === false || String(response.data.onboarding_complete) === "false") {
+          router.push("/setup");
+        } else {
+          router.push("/dashboard");
+        }
+      }, 1500);
     } catch (error: any) {
       console.error("Registration process aborted", error);
       

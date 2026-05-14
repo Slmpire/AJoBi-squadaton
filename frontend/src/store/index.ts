@@ -5,9 +5,11 @@ import marketplaceReducer from './slices/marketplaceSlice';
 import savingsReducer from './slices/savingsSlice';
 import settingsReducer from './slices/settingsSlice';
 import scoreReducer from './slices/scoreSlice';
+import authReducer from './slices/authSlice';
 
 export const store = configureStore({
   reducer: {
+    auth: authReducer,
     groups: groupsReducer,
     marketplace: marketplaceReducer,
     savings: savingsReducer,

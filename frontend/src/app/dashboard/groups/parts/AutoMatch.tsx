@@ -54,7 +54,15 @@ export default function AutoMatch({
               <input 
                 type="text" 
                 value={matchAmount}
-                onChange={(e) => setMatchAmount(e.target.value)}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/[^0-9]/g, "");
+                  if (val === "") {
+                    setMatchAmount("");
+                    return;
+                  }
+                  const formatted = Number(val).toLocaleString();
+                  setMatchAmount(formatted);
+                }}
                 className="text-[28px] font-black text-gray-900 outline-none w-full bg-transparent"
                 placeholder="50,000"
               />
