@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { setupService, SetupFinalResponse } from "@/services/setupService";
 import { useAppSelector } from "@/store";
+import { useRouter } from "next/navigation";
 
 export interface SetupFormData {
   profileType: string;
@@ -20,11 +21,14 @@ export interface SetupFormData {
 
 export const useSetupWizard = () => {
   const [currentStep, setCurrentStep] = useState(1);
+    const router = useRouter();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const [scoreData, setScoreData] = useState<SetupFinalResponse['data'] | null>(null);
   const user = useAppSelector((state) => state.auth.user);
+  const userId = user?.user_id;
   const email = user?.email;
   console.log("email", email)
   console.log("user", user)
@@ -68,7 +72,8 @@ export const useSetupWizard = () => {
         const res = await setupService.getProgress(email);
         console.log("res", res)
         if (res.data.onboarding_complete) {
-          setCurrentStep(6);
+          // setCurrentStep(6);
+          router.push("/dashboard");
         } else if (res.data.current_step) {
           setCurrentStep(res.data.current_step);
         }
