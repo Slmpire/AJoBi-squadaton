@@ -23,6 +23,7 @@ export default function BrowseGroups({
   frequencyFilter,
   setFrequencyFilter
 }: BrowseGroupsProps) {
+  console.log(groups, "groups");
   return (
     <div className="space-y-8">
       <div>
@@ -146,7 +147,7 @@ export default function BrowseGroups({
                     href={`/dashboard/groups/${group.id}`}
                     className="w-full border-2 border-[#066B44] text-[#066B44] hover:bg-[#066B44] hover:text-white py-3 rounded-xl text-[13px] font-black transition-all duration-200 flex items-center justify-center gap-1.5 shadow-sm group/btn"
                   >
-                    View Details
+                    View group
                     <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-0.5 transition-transform" />
                   </Link>
                 )}

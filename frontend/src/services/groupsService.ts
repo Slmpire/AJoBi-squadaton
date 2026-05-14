@@ -40,7 +40,8 @@ export const groupsService = {
   },
 
   browseGroups: async (params?: BrowseGroupsParams) => {
-    const response = await apiClient.get('/api/groups', { params });
+    const response = await apiClient.get('/api/groups/browse', { params });
+    
     return response.data;
   },
 

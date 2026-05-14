@@ -55,7 +55,7 @@ export default function PreviewSummary({
           <button 
             onClick={onSubmit}
             disabled={isSubmitting}
-            className="w-full bg-white text-[#066B44] hover:bg-gray-50 disabled:opacity-90 py-4 rounded-xl text-[14px] font-black flex items-center justify-center gap-2 shadow-md transition-all duration-200 group hover:shadow-lg"
+            className="w-full bg-white cursor-pointer text-[#066B44] hover:bg-gray-50 disabled:opacity-90 py-4 rounded-xl text-[14px] font-black flex items-center justify-center gap-2 shadow-md transition-all duration-200 group hover:shadow-lg"
           >
             {isSubmitting ? (
               <Loader2 className="w-5 h-5 animate-spin" />

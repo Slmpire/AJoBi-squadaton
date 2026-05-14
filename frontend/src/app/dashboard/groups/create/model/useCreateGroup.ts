@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { groupsService } from "@/services/groupsService";
+import { RootState, useAppSelector } from "@/store";
 
 export interface CreateGroupFormData {
   name: string;
@@ -15,6 +16,7 @@ export interface CreateGroupFormData {
 
 export const useCreateGroup = () => {
   const router = useRouter();
+  const user = useAppSelector((state: RootState) => state.auth.user);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState<CreateGroupFormData>({
@@ -54,8 +56,9 @@ export const useCreateGroup = () => {
     try {
       // Mapped variables to match STAGE 4 backend payload guidelines
       const payload = {
-        name: formData.name || "My Savings Circle",
-        contribution_amount: parseFloat(formData.amount) || 10000,
+        user_id: user?.user_id,
+        name: formData.name,
+        contribution_amount: parseFloat(formData.amount),
         frequency: formData.frequency.toLowerCase() as 'weekly' | 'monthly',
         max_members: formData.maxMembers,
         // Mapped from 400-1000 UI range down to the requested backend 40-100 format
@@ -65,7 +68,9 @@ export const useCreateGroup = () => {
         description: formData.description
       };
 
+
       const response = await groupsService.createGroup(payload);
+      console.log("group created", response);
       
       if (response.success) {
         router.push(`/dashboard/groups/${response.data.group_id}`);

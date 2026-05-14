@@ -40,6 +40,8 @@ export interface MatchedGroup {
 export const useGroups = () => {
   const dispatch = useAppDispatch();
   const { myGroups, publicGroups, isLoading, error } = useAppSelector((state) => state.groups);
+  console.log(myGroups, "my group");
+  console.log(publicGroups, "public groups");
   
   const [activeTab, setActiveTab] = useState<'my' | 'browse' | 'match'>('my');
   
@@ -143,6 +145,8 @@ export const useGroups = () => {
       return true;
     });
   }, [publicGroups, searchFilter, amountFilter, frequencyFilter]);
+
+  console.log(filteredPublicGroups, "filteredPublicGroups");
 
   return {
     isLoading,

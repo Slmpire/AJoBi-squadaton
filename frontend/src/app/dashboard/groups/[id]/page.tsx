@@ -21,7 +21,10 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
     rotationTimeline,
     members,
     history,
-    userStatus
+    userStatus,
+    handleJoinGroup,
+    isJoining,
+    isMember
   } = useGroupDetails(id);
 
   if (isLoading) {
@@ -48,6 +51,9 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
             rotation={groupInfo.rotation}
             currentCycle={groupInfo.currentCycle}
             totalCycles={groupInfo.totalCycles}
+            onJoin={handleJoinGroup}
+            isJoining={isJoining}
+            isMember={isMember}
           />
 
           <RotationTracker 

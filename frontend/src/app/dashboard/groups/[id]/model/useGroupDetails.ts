@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { groupsService } from "@/services/groupsService";
+import { groupsService, JoinGroupPayload } from "@/services/groupsService";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { joinGroup as joinGroupThunk } from "@/store/slices/groupsSlice";
 
 export interface MemberData {
   id: string;
@@ -26,42 +28,35 @@ export const useGroupDetails = (groupId: string) => {
 
   // Main layout states
   const [groupInfo, setGroupInfo] = useState({
-    name: "Lagos Techies Savings",
-    status: "Active",
-    contribution: "₦50,000 Contribution",
-    rotation: "Monthly Rotation",
-    currentCycle: 3,
-    totalCycles: 8,
-    nextDisbursement: "₦400,000 in 12 days (Oct 24)",
-    onTimeRate: "98%"
+    name: "",
+    status: "",
+    contribution: "",
+    rotation: "",
+    currentCycle: 0,
+    totalCycles: 0,
+    nextDisbursement: "",
+    onTimeRate: "0%"
   });
 
-  const [rotationTimeline, setRotationTimeline] = useState([
-    { id: "1", name: "Tunde A.", pos: "Pos 1", completed: true, isNext: false, avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop" },
-    { id: "2", name: "Sarah W.", pos: "Pos 2", completed: true, isNext: false, avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop" },
-    { id: "3", name: "Adeola B.", pos: "Pos 3", completed: false, isNext: true, avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop" },
-    { id: "4", name: "Obinna K.", pos: "Pos 4", completed: false, isNext: false, avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop" },
-    { id: "5", name: "Blessing O.", pos: "Pos 5", completed: false, isNext: false, avatar: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop" },
-  ]);
+  const [rotationTimeline, setRotationTimeline] = useState<any[]>([]);
 
-  const [members, setMembers] = useState<MemberData[]>([
-    { id: "1", name: "Tunde Bakare", initials: "TB", score: 780, scoreTag: "Excellent", position: 1, status: "Paid", statusDetail: "Paid 2 days ago" },
-    { id: "2", name: "Sarah Williams", initials: "SW", score: 640, scoreTag: "Good", position: 2, status: "Pending", statusDetail: "Pending automatic debit" },
-    { id: "3", name: "Adeola Bakare", initials: "AB", score: 730, scoreTag: "Excellent", position: 3, status: "Paid", statusDetail: "Paid 5 days ago" },
-    { id: "4", name: "Obinna Kalu", initials: "OK", score: 420, scoreTag: "Fair", position: 4, status: "Missed", statusDetail: "24h Past Due" }
-  ]);
+  const [members, setMembers] = useState<MemberData[]>([]);
 
-  const [history, setHistory] = useState<HistoryItem[]>([
-    { cycle: "#2", date: "Sep 24, 2024", collected: "100%", disbursedTo: "Sarah Williams", amount: "₦400,000" },
-    { cycle: "#1", date: "Aug 24, 2024", collected: "100%", disbursedTo: "Tunde Bakare", amount: "₦400,000" }
-  ]);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
 
   const [userStatus, setUserStatus] = useState({
-    paymentStatus: "Paid",
-    paymentMethod: "Squad Direct Debit",
-    methodActive: true,
-    methodDetails: "Your next contribution of ₦50,000 will be automatically deducted on Oct 24th from Zenith Bank (***4521)."
+    paymentStatus: "Pending",
+    paymentMethod: "N/A",
+    methodActive: false,
+    methodDetails: "Loading status..."
   });
+
+  const [isJoining, setIsJoining] = useState(false);
+  const [joinError, setJoinError] = useState<string | null>(null);
+  const [isMember, setIsMember] = useState(false);
+
+  const dispatch = useAppDispatch();
+  const user = useAppSelector((state) => state.auth.user);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -120,6 +115,32 @@ export const useGroupDetails = (groupId: string) => {
               };
             });
             setMembers(mappedMembers);
+
+            // Update user status
+            const myStatus = data.this_cycle_contributions.find((c: any) => c.user_id === user?.user_id);
+            if (myStatus) {
+              setUserStatus({
+                paymentStatus: myStatus.status === 'paid' ? 'Paid' : myStatus.status === 'missed' ? 'Missed' : 'Pending',
+                paymentMethod: data.direct_debit_active ? "Squad Direct Debit" : "Manual Transfer",
+                methodActive: data.direct_debit_active || false,
+                methodDetails: myStatus.status === 'paid' 
+                  ? `You successfully paid for this cycle on ${new Date(myStatus.paid_at).toLocaleDateString()}.` 
+                  : data.direct_debit_active 
+                    ? `Your next contribution of ₦${data.contribution_amount.toLocaleString()} will be automatically deducted on ${new Date(data.next_contribution_date).toLocaleDateString()}.`
+                    : `Please make your payment of ₦${data.contribution_amount.toLocaleString()} before the deadline.`
+              });
+            } else {
+              setUserStatus({
+                paymentStatus: "Pending",
+                paymentMethod: "N/A",
+                methodActive: false,
+                methodDetails: "You are not a member of this cycle's rotation."
+              });
+            }
+
+            // Check if user is already a member
+            const memberCheck = data.rotation?.some((r: any) => r.user_id === user?.user_id);
+            setIsMember(!!memberCheck);
           }
         }
 
@@ -150,12 +171,47 @@ export const useGroupDetails = (groupId: string) => {
     fetchDetails();
   }, [groupId]);
 
+  const handleJoinGroup = async (inviteCode?: string) => {
+    setIsJoining(true);
+    setJoinError(null);
+    try {
+      const resultAction = await dispatch(joinGroupThunk({ 
+        groupId, 
+        payload: { invite_code: inviteCode || "" } 
+      }));
+      
+      if (joinGroupThunk.fulfilled.match(resultAction)) {
+        // Refresh details after joining
+        const detResp = await groupsService.getGroupDetail(groupId);
+        if (detResp.success && detResp.data) {
+          setIsMember(true);
+          // Re-trigger the logic or just let the next refresh handle it
+          // For now, let's just refresh the whole hook data
+          window.location.reload(); // Simple way to refresh for now, or we could manually set states
+        }
+        return true;
+      } else {
+        setJoinError(resultAction.payload as string || "Failed to join group");
+        return false;
+      }
+    } catch (err: any) {
+      setJoinError(err.message);
+      return false;
+    } finally {
+      setIsJoining(false);
+    }
+  };
+
   return {
     isLoading,
+    isJoining,
+    joinError,
+    isMember,
     groupInfo,
     rotationTimeline,
     members,
     history,
-    userStatus
+    userStatus,
+    handleJoinGroup
   };
 };

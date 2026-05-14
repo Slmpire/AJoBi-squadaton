@@ -10,6 +10,9 @@ interface GroupHeaderProps {
   rotation: string;
   currentCycle: number;
   totalCycles: number;
+  onJoin: () => void;
+  isJoining: boolean;
+  isMember: boolean;
 }
 
 export default function GroupHeader({
@@ -18,7 +21,10 @@ export default function GroupHeader({
   contribution,
   rotation,
   currentCycle,
-  totalCycles
+  totalCycles,
+  onJoin,
+  isJoining,
+  isMember
 }: GroupHeaderProps) {
   const progress = (currentCycle / totalCycles) * 100;
 
@@ -51,12 +57,25 @@ export default function GroupHeader({
 
           {/* Right side with actions */}
           <div className="flex flex-wrap items-center gap-3 shrink-0">
-            <button className="px-5 py-2.5 rounded-xl bg-white border border-[#E8EFE8] text-[13px] font-bold text-gray-700 hover:bg-[#F9FCF9] transition-colors">
-              View Rules
-            </button>
-            <button className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all">
-              Make Payment
-            </button>
+            {!isMember ? (
+              <button 
+                onClick={onJoin}
+                disabled={isJoining}
+                className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all flex items-center gap-2 disabled:opacity-70"
+              >
+                {isJoining ? "Joining..." : "Join group"}
+              </button>
+            ) : (
+              <button className="px-5 py-2.5 rounded-xl bg-white border border-[#E8EFE8] text-[13px] font-bold text-gray-700 hover:bg-[#F9FCF9] transition-colors">
+                Share Group
+              </button>
+            )}
+            
+            {isMember && (
+              <button className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all">
+                Make Payment
+              </button>
+            )}
           </div>
         </div>
 
