@@ -6,8 +6,9 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
-import { authService } from "@/services/authService";
 import { isAxiosError } from "axios";
+import { useAppDispatch } from "@/store";
+import { registerUser } from "@/store/slices/authSlice";
 
 
 export const registrationSchema = yup.object().shape({
@@ -37,6 +38,7 @@ export type RegistrationFormValues = yup.InferType<typeof registrationSchema>;
 
 export const useRegistrationForm = () => {
   const router = useRouter();
+  const dispatch = useAppDispatch();
   const [isSuccess, setIsSuccess] = useState(false);
 
   const {
@@ -58,18 +60,14 @@ export const useRegistrationForm = () => {
 
   const onSubmit = async (data: RegistrationFormValues) => {
     try {
-      const response = await authService.register(data);
+      const response = await dispatch(registerUser(data)).unwrap();
       console.log("Registration successful:", response);
       
-      if (response.data && response.data.token) {
-        localStorage.setItem("token", response.data.token);
-      }
-
       setIsSuccess(true);
       
       // Delay redirect slightly so success state can be seen if needed
       setTimeout(() => {
-        if (response.data.onboarding_complete === false || String(response.data.onboarding_complete) === "false") {
+        if (response.data.onboarding_complete === "false" || response.data.onboarding_complete === false) {
           router.push("/setup");
         } else {
           router.push("/dashboard");
@@ -80,7 +78,9 @@ export const useRegistrationForm = () => {
       
       let errorMessage = "Registration failed. Please try again.";
       
-      if (isAxiosError(error) && error.response?.data?.error) {
+      if (typeof error === 'string') {
+        errorMessage = error;
+      } else if (isAxiosError(error) && error.response?.data?.error) {
         const apiError = error.response.data.error;
         errorMessage = apiError.message || errorMessage;
         

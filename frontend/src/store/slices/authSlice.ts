@@ -1,18 +1,22 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { authService, UserData } from '@/services/authService';
+import { authService, UserData, LoginResponse, RegisterResponse } from '@/services/authService';
 
 interface AuthState {
   user: UserData | null;
+  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
+  onboardingComplete: boolean | string | null;
 }
 
 const initialState: AuthState = {
   user: null,
+  token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
   isAuthenticated: false,
   isLoading: false,
   error: null,
+  onboardingComplete: null,
 };
 
 export const fetchCurrentUser = createAsyncThunk(
@@ -30,13 +34,39 @@ export const fetchCurrentUser = createAsyncThunk(
   }
 );
 
+export const loginUser = createAsyncThunk(
+  'auth/login',
+  async (credentials: any, { rejectWithValue }) => {
+    try {
+      const response = await authService.login(credentials);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || error.message);
+    }
+  }
+);
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (data: any, { rejectWithValue }) => {
+    try {
+      const response = await authService.register(data);
+      return response;
+    } catch (error: any) {
+      return rejectWithValue(error.response?.data?.error?.message || error.message);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     logout: (state) => {
       state.user = null;
+      state.token = null;
       state.isAuthenticated = false;
+      state.onboardingComplete = null;
       localStorage.removeItem('token');
     },
     setAuthError: (state, action: PayloadAction<string | null>) => {
@@ -45,6 +75,7 @@ const authSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Current User
       .addCase(fetchCurrentUser.pending, (state) => {
         state.isLoading = true;
         state.error = null;
@@ -53,11 +84,44 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.user = action.payload;
         state.isAuthenticated = !!action.payload;
+        if (action.payload) {
+          state.onboardingComplete = action.payload.onboarding_complete;
+        }
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
         state.isLoading = false;
         state.error = action.payload as string;
         state.isAuthenticated = false;
+      })
+      // Login
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.token = action.payload.data.token;
+        state.onboardingComplete = action.payload.data.onboarding_complete;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      })
+      // Register
+      .addCase(registerUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(registerUser.fulfilled, (state, action: PayloadAction<RegisterResponse>) => {
+        state.isLoading = false;
+        state.isAuthenticated = true;
+        state.token = action.payload.data.token;
+        state.onboardingComplete = action.payload.data.onboarding_complete;
+      })
+      .addCase(registerUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
       });
   },
 });
