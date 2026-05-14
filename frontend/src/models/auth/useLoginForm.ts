@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
@@ -20,7 +20,11 @@ export const loginSchema = yup.object().shape({
   rememberMe: yup.boolean().default(false),
 });
 
-export type LoginFormValues = yup.InferType<typeof loginSchema>;
+export interface LoginFormValues {
+  email: string;
+  password: string;
+  rememberMe: boolean;
+}
 
 export const useLoginForm = () => {
   const router = useRouter();
@@ -32,7 +36,7 @@ export const useLoginForm = () => {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(loginSchema) as any,
     defaultValues: {
       email: "",
       password: "",
@@ -40,7 +44,7 @@ export const useLoginForm = () => {
     },
   });
 
-  const onSubmit = async (data: LoginFormValues) => {
+  const onSubmit: SubmitHandler<LoginFormValues> = async (data) => {
     try {
       const response = await dispatch(loginUser(data)).unwrap();
       console.log("Login successful:", response);

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { useForm } from "react-hook-form";
+import { useForm, SubmitHandler } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
@@ -34,7 +34,13 @@ export const registrationSchema = yup.object().shape({
     .required("Please confirm your password"),
 });
 
-export type RegistrationFormValues = yup.InferType<typeof registrationSchema>;
+export interface RegistrationFormValues {
+  fullName: string;
+  phoneNumber: string;
+  email?: string;
+  password: string;
+  confirmPassword: string;
+}
 
 export const useRegistrationForm = () => {
   const router = useRouter();
@@ -47,7 +53,7 @@ export const useRegistrationForm = () => {
     setError,
     formState: { errors, isSubmitting },
   } = useForm<RegistrationFormValues>({
-    resolver: yupResolver(registrationSchema),
+    resolver: yupResolver(registrationSchema) as any,
     mode: "onTouched",
     defaultValues: {
       fullName: "",
@@ -58,7 +64,7 @@ export const useRegistrationForm = () => {
     },
   });
 
-  const onSubmit = async (data: RegistrationFormValues) => {
+  const onSubmit: SubmitHandler<RegistrationFormValues> = async (data) => {
     try {
       const response = await dispatch(registerUser(data)).unwrap();
       console.log("Registration successful:", response);
