@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   description: "AjoBI is Nigeria's first digital cooperative society.",
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -19,8 +21,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${inter.variable} h-full antialiased scroll-smooth`}>
-      <body className="min-h-full flexflex-col font-sans bg-[#F4FBF4] text-[#111827]">
-        {children}
+      <body className="min-h-full flex flex-col font-sans bg-[#F4FBF4] text-[#111827]">
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

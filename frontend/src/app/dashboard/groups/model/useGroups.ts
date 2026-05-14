@@ -1,5 +1,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { groupsService } from "@/services/groupsService";
+import { useAppDispatch, useAppSelector } from "@/store";
+import { fetchMyGroups, fetchPublicGroups } from "@/store/slices/groupsSlice";
 
 export interface GroupItem {
   id: string;
@@ -36,6 +38,9 @@ export interface MatchedGroup {
 }
 
 export const useGroups = () => {
+  const dispatch = useAppDispatch();
+  const { myGroups, publicGroups, isLoading, error } = useAppSelector((state) => state.groups);
+  
   const [activeTab, setActiveTab] = useState<'my' | 'browse' | 'match'>('my');
   
   // Search & States
@@ -50,111 +55,8 @@ export const useGroups = () => {
   const [isMatching, setIsMatching] = useState(false);
   const [showMatches, setShowMatches] = useState(false);
 
-  // Live API States
-  const [myGroups, setMyGroups] = useState<GroupItem[]>([]);
-  const [publicGroups, setPublicGroups] = useState<PublicGroup[]>([]);
+  // Local state for matches since it's a specific interaction
   const [matchedGroups, setMatchedGroups] = useState<MatchedGroup[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fallbackMyGroups: GroupItem[] = [
-    {
-      id: "1",
-      name: "Lagos Techies",
-      type: "Monthly Contribution",
-      contribution: "₦50,000",
-      nextPayout: "Oct 24, 2024",
-      position: "3rd in line",
-      status: "Paid",
-      members: 8,
-      avatars: [
-        "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop"
-      ]
-    },
-    {
-      id: "2",
-      name: "Family Fund",
-      type: "Weekly Contribution",
-      contribution: "₦25,000",
-      nextPayout: "Tomorrow",
-      position: "1st in line",
-      status: "Pending",
-      members: 4,
-      avatars: [
-        "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop"
-      ]
-    },
-    {
-      id: "3",
-      name: "Startup Circle",
-      type: "Bi-Weekly Contribution",
-      contribution: "₦100,000",
-      nextPayout: "Nov 10, 2024",
-      position: "12th in line",
-      status: "Missed",
-      members: 12,
-      avatars: [
-        "https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?q=80&w=100&auto=format&fit=crop",
-        "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=100&auto=format&fit=crop"
-      ]
-    }
-  ];
-
-  const fallbackPublicGroups: PublicGroup[] = [
-    {
-      id: "101",
-      name: "Tunde's Elite Circle",
-      admin: "Tunde O.",
-      amount: "₦250K/mo",
-      rawAmount: 250000,
-      frequency: "Monthly",
-      slots: "2 of 10 available",
-      minScore: 750
-    },
-    {
-      id: "102",
-      name: "Lagos Blue Chips",
-      admin: "Sarah J.",
-      amount: "₦1M/mo",
-      rawAmount: 1000000,
-      frequency: "Monthly",
-      slots: "Full",
-      minScore: 900,
-      locked: true,
-      tierRequired: "Tier 3"
-    },
-    {
-      id: "103",
-      name: "Abuja Traders Alliance",
-      admin: "Ahmed M.",
-      amount: "₦45K/wk",
-      rawAmount: 45000,
-      frequency: "Weekly",
-      slots: "5 of 12 available",
-      minScore: 600
-    },
-    {
-      id: "104",
-      name: "Tech Starter Pack",
-      admin: "Chioma D.",
-      amount: "₦20K/wk",
-      rawAmount: 20000,
-      frequency: "Weekly",
-      slots: "8 of 15 available",
-      minScore: 450
-    },
-    {
-      id: "105",
-      name: "Cooperative Real Estate",
-      admin: "Banky W.",
-      amount: "₦150K/bw",
-      rawAmount: 150000,
-      frequency: "Bi-Weekly",
-      slots: "1 of 8 available",
-      minScore: 700
-    }
-  ];
 
   const fallbackMatchedGroups: MatchedGroup[] = [
     {
@@ -183,67 +85,11 @@ export const useGroups = () => {
     }
   ];
 
-  // Initialize API calls
+  // Initialize API calls through Redux
   useEffect(() => {
-    const fetchAllGroups = async () => {
-      setIsLoading(true);
-      try {
-        // 1. Load My Groups
-        try {
-          const myResp = await groupsService.getMyGroups();
-          if (myResp.success && myResp.data?.groups) {
-            const mapped = myResp.data.groups.map((g: any) => ({
-              id: g.group_id,
-              name: g.name,
-              type: `${g.frequency.charAt(0).toUpperCase() + g.frequency.slice(1)} Contribution`,
-              contribution: `₦${g.contribution_amount.toLocaleString()}`,
-              nextPayout: new Date(g.next_contribution_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-              position: `${g.my_rotation_position} in line`,
-              status: g.my_contribution_status === 'paid' ? 'Paid' : g.my_contribution_status === 'missed' ? 'Missed' : 'Pending',
-              members: g.total_cycles, // approximation or total member spots
-              avatars: []
-            }));
-            setMyGroups(mapped);
-          } else {
-            setMyGroups(fallbackMyGroups);
-          }
-        } catch {
-          setMyGroups(fallbackMyGroups);
-        }
-
-        // 2. Load Public Groups
-        try {
-          const publicResp = await groupsService.browseGroups();
-          if (publicResp.success && publicResp.data?.groups) {
-            const mapped = publicResp.data.groups.map((g: any) => ({
-              id: g.group_id,
-              name: g.name,
-              admin: g.creator_name || "Admin",
-              amount: `₦${(g.contribution_amount / 1000)}K/${g.frequency === 'weekly' ? 'wk' : 'mo'}`,
-              rawAmount: g.contribution_amount,
-              frequency: g.frequency === 'weekly' ? 'Weekly' : 'Monthly',
-              slots: `${g.spots_remaining} of ${g.max_members} available`,
-              minScore: g.min_ajo_score,
-              locked: g.locked,
-              tierRequired: g.tier
-            }));
-            setPublicGroups(mapped);
-          } else {
-            setPublicGroups(fallbackPublicGroups);
-          }
-        } catch {
-          setPublicGroups(fallbackPublicGroups);
-        }
-
-      } catch (e) {
-        console.warn("Group fetch failover triggered", e);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchAllGroups();
-  }, []);
+    dispatch(fetchMyGroups());
+    dispatch(fetchPublicGroups());
+  }, [dispatch]);
 
   // Trigger AI Match Engine
   const handleFindMatch = async () => {
