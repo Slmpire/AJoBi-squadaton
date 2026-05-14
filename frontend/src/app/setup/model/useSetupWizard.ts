@@ -133,7 +133,7 @@ export const useSetupWizard = () => {
           has_borrowed: formData.borrowedMoney === "Yes",
           repaid_fully: formData.paidBackFully === "Yes",
           repaid_on_time: formData.paidOnTime === "Yes",
-          
+          email: email
         });
         nextStep();
       } else if (currentStep === 5) {

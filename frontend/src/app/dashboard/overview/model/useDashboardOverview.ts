@@ -49,11 +49,15 @@ export const useDashboardOverview = () => {
   const { balance, isLoading: savingsLoading } = useAppSelector((state) => state.savings);
   const { profile, isLoading: settingsLoading } = useAppSelector((state) => state.settings);
   const { ajoScore, eligibility, isLoading: scoreLoading } = useAppSelector((state) => state.score);
+  const user  = useAppSelector((state) => state.auth.user);
+  console.log('user', user);
+  console.log('user id', user?.user_id);
+  
 
   const isLoading = groupsLoading || marketplaceLoading || savingsLoading || settingsLoading || scoreLoading;
 
   useEffect(() => {
-    const userId = "user6a02f65ad51313.56219069"; 
+    const userId = user?.user_id; 
     
     dispatch(fetchMyGroups());
     dispatch(fetchListings({ limit: 5 }));
@@ -68,7 +72,7 @@ export const useDashboardOverview = () => {
 
     return {
       ajoScore: ajoScore?.score || 0,
-      scoreTier: ajoScore?.tier || "Bronze",
+      scoreTier: (typeof ajoScore?.tier === 'object' ? (ajoScore.tier as any).name : ajoScore?.tier) || "Bronze",
       scoreDiff: 0,
       activeGroups: myGroups.map(g => ({
         name: g.name,

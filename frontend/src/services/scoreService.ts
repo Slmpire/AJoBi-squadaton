@@ -17,7 +17,7 @@ export interface LockedFeature {
 
 export interface AjoScoreData {
   score: number;
-  tier: string;
+  tier: string | { name: string; color: string; next: string; points_to_next: number };
   tier_color: string;
   next_tier: string;
   points_to_next_tier: number;
@@ -66,9 +66,9 @@ export interface EligibilityData {
 }
 
 export const scoreService = {
-  // getAjoScore: async (userId: string) => 
-  getAjoScore: async () => {
-    const userId = "user6a02f65ad51313.56219069"
+  getAjoScore: async (userId: string) =>  {
+  // getAjoScore: async () => {
+    // const userId = "user6a02f65ad51313.56219069"
     const response = await apiClient.get(`/api/score/${userId}`);
     console.log("ajo score service", response.data);
     return response.data;

@@ -23,8 +23,8 @@ export const fetchAjoScore = createAsyncThunk(
   'score/fetchAjoScore',
   async (userId: string, { rejectWithValue }) => {
     try {
-      // const response = await scoreService.getAjoScore(userId);
-      const response = await scoreService.getAjoScore();
+      const response = await scoreService.getAjoScore(userId);
+      // const response = await scoreService.getAjoScore();
       console.log("ajo score", response);
       if (response.success) {
         return response.data;
