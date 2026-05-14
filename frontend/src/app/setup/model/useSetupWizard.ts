@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { setupService, SetupFinalResponse } from "@/services/setupService";
+import { useAppSelector } from "@/store";
 
 export interface SetupFormData {
   profileType: string;
@@ -23,6 +24,10 @@ export const useSetupWizard = () => {
   const [error, setError] = useState<string | null>(null);
   const [isLoadingProgress, setIsLoadingProgress] = useState(true);
   const [scoreData, setScoreData] = useState<SetupFinalResponse['data'] | null>(null);
+  const user = useAppSelector((state) => state.auth.user);
+  const email = user?.email;
+  console.log("email", email)
+  console.log("user", user)
 
   const [formData, setFormData] = useState<SetupFormData>({
     profileType: "",
@@ -60,7 +65,8 @@ export const useSetupWizard = () => {
   useEffect(() => {
     const loadProgress = async () => {
       try {
-        const res = await setupService.getProgress();
+        const res = await setupService.getProgress(email);
+        console.log("res", res)
         if (res.data.onboarding_complete) {
           setCurrentStep(6);
         } else if (res.data.current_step) {
@@ -102,14 +108,15 @@ export const useSetupWizard = () => {
     setError(null);
     try {
       if (currentStep === 1) {
-        await setupService.submitStep1({ occupation: formData.profileType });
+        await setupService.submitStep1({ occupation: formData.profileType, email: email });
         nextStep();
       } else if (currentStep === 2) {
         await setupService.submitStep2({
           trade_duration: mapDuration(formData.workDuration),
           state: formData.state,
           lga: formData.lga,
-          income_range: mapIncome(formData.incomeRange)
+          income_range: mapIncome(formData.incomeRange),
+          email: email
         });
         nextStep();
       } else if (currentStep === 3) {
@@ -117,20 +124,23 @@ export const useSetupWizard = () => {
           saves_money: formData.saveMethods.length > 0,
           savings_methods: formData.saveMethods.map(mapSavingsMethod),
           in_ajo_group: formData.inAjoGroup === "Yes",
-          contribution_consistency: formData.contributionConsistency
+          contribution_consistency: formData.contributionConsistency,
+          email: email
         });
         nextStep();
       } else if (currentStep === 4) {
         await setupService.submitStep4({
           has_borrowed: formData.borrowedMoney === "Yes",
           repaid_fully: formData.paidBackFully === "Yes",
-          repaid_on_time: formData.paidOnTime === "Yes"
+          repaid_on_time: formData.paidOnTime === "Yes",
+          
         });
         nextStep();
       } else if (currentStep === 5) {
         const res = await setupService.submitStep5({
           language: formData.language,
-          profile_photo: null
+          profile_photo: null,
+          email: email
         });
         setScoreData(res.data);
         nextStep();

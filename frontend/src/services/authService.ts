@@ -15,18 +15,19 @@ export interface AuthResponse {
 export interface UserData {
   user_id: string;
   full_name: string;
-  phone: string;
+  phone?: string;
   email?: string;
   occupation?: string;
   state?: string;
   lga?: string;
   language?: string;
-  ajo_score: number;
-  score_tier: string;
+  token?: string;
+  ajo_score?: number;
+  score_tier?: string;
   profile_photo?: string;
   onboarding_complete: boolean;
-  member_since: string;
-  squad_wallet_balance: number;
+  member_since?: string;
+  squad_wallet_balance?: number;
 }
 
 export interface LoginResponse {
@@ -35,6 +36,7 @@ export interface LoginResponse {
     user_id: string;
     full_name: string;
     token: string;
+    email: string;
     ajo_score: number;
     score_tier: string;
     onboarding_complete: boolean | string;
@@ -58,9 +60,10 @@ export const authService = {
    */
   login: async (credentials: any): Promise<LoginResponse> => {
     const response = await apiClient.post<LoginResponse>('/api/auth/login', {
-      phone: credentials.phone, 
+      email: credentials.email, 
       password: credentials.password
     });
+    console.log(response.data);
 
     if (response.data.success && response.data.data.token) {
       localStorage.setItem('token', response.data.data.token);
