@@ -71,14 +71,11 @@ export const useRegistrationForm = () => {
       
       setIsSuccess(true);
       
-      // Delay redirect slightly so success state can be seen if needed
-      setTimeout(() => {
-        if (response.data.onboarding_complete === "false" || response.data.onboarding_complete === false) {
-          router.push("/setup");
-        } else {
-          router.push("/dashboard");
-        }
-      }, 1500);
+      if (response.data.onboarding_complete === "false" || response.data.onboarding_complete === false) {
+        router.push("/setup");
+      } else {
+        router.push("/dashboard");
+      }
     } catch (error: any) {
       console.error("Registration process aborted", error);
       

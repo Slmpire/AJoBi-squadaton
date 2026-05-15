@@ -41,7 +41,6 @@ export const loginUser = createAsyncThunk(
   async (credentials: any, { rejectWithValue }) => {
     try {
       const response = await authService.login(credentials);
-      const token = "F45E1A8D32C6B89E4D2F1A6C3B5E9F7D8A1B2C4E6IDJLSJOE9G1H2I3J4K5L6M7N8ODKJSHSJJ"
 
       // const response = await axios.post(
       //   `${BASE_URL}/api/auth/login`,
@@ -113,9 +112,9 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<LoginResponse>) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.token = action.payload.data.token;
-        state.onboardingComplete = action.payload.data.onboarding_complete;
-        state.user = action.payload.data
+        state.token = action.payload?.data?.token || null;
+        state.onboardingComplete = action.payload?.data?.onboarding_complete || false;
+        state.user = action.payload?.data || null;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -129,8 +128,8 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action: PayloadAction<RegisterResponse>) => {
         state.isLoading = false;
         state.isAuthenticated = true;
-        state.token = action.payload.data.token;
-        state.onboardingComplete = action.payload.data.onboarding_complete;
+        state.token = action.payload?.data?.token || null;
+        state.onboardingComplete = action.payload?.data?.onboarding_complete || false;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;

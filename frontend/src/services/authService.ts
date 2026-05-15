@@ -65,7 +65,7 @@ export const authService = {
     });
     console.log(response.data);
 
-    if (response.data.success && response.data.data.token) {
+    if (response.data?.success && response.data?.data?.token) {
       localStorage.setItem('token', response.data.data.token);
     }
 
@@ -79,16 +79,13 @@ export const authService = {
     const payload: any = {
       full_name: data.fullName,
       phone: data.phoneNumber,
-      password: data.password
+      password: data.password,
+      email: data.email,
     };
-    
-    if (data.email) {
-      payload.email = data.email;
-    }
 
     const response = await apiClient.post<RegisterResponse>('/api/auth/register', payload);
 
-    if (response.data.success && response.data.data.token) {
+    if (response.data?.success && response.data?.data?.token) {
       localStorage.setItem('token', response.data.data.token);
     }
 

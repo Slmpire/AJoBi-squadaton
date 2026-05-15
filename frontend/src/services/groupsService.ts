@@ -26,6 +26,7 @@ export interface JoinGroupPayload {
 export interface AutoMatchPayload {
   contribution_amount: number;
   frequency: 'weekly' | 'monthly';
+  user_id: string;
 }
 
 export interface MandatePayload {
@@ -41,7 +42,7 @@ export const groupsService = {
 
   browseGroups: async (params?: BrowseGroupsParams) => {
     const response = await apiClient.get('/api/groups/browse', { params });
-    
+              
     return response.data;
   },
 

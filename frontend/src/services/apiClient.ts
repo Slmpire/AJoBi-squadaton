@@ -16,8 +16,8 @@ apiClient.interceptors.request.use(
   (config) => {
     if (typeof window !== 'undefined') {
       const token = "F45E1A8D32C6B89E4D2F1A6C3B5E9F7D8A1B2C4E6IDJLSJOE9G1H2I3J4K5L6M7N8ODKJSHSJJ";
-      config.headers.Authorization = `Bearer ${token}`;
-    }
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     return config;
   },
   (error) => {
@@ -39,7 +39,14 @@ export class ApiError extends Error {
 
 // Add a response interceptor to standardize error throwing
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Some backend endpoints return HTTP 200 but indicate an error in the payload
+    if (response.data && (response.data.success === false || response.data.success === "false")) {
+      const message = response.data.error?.message || response.data.message || 'An error occurred';
+      return Promise.reject(new ApiError(200, message, response.data));
+    }
+    return response;
+  },
   (error) => {
     if (error.response) {
       // The request was made and the server responded with a status code

@@ -73,7 +73,7 @@ export default function LoginPage() {
                   type="text"
                   {...register("email")}
                   className={`block w-full pl-10 pr-4 py-3 bg-[#EEF2EF] border ${errors.email ? 'border-red-300 focus:border-red-500' : 'border-transparent focus:border-ajobi-green'} rounded-xl text-sm focus:bg-white focus:ring-1 focus:ring-opacity-50 transition-colors`}
-                  placeholder="e.g. 08012345678"
+                  placeholder="e.g. squadco@gmail.com"
                 />
               </div>
               {errors.email && (

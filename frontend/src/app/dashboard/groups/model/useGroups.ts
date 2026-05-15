@@ -35,6 +35,7 @@ export interface MatchedGroup {
   description: string;
   amount: string;
   members: string;
+  proposedMembers?: any[];
 }
 
 export const useGroups = () => {
@@ -60,33 +61,6 @@ export const useGroups = () => {
   // Local state for matches since it's a specific interaction
   const [matchedGroups, setMatchedGroups] = useState<MatchedGroup[]>([]);
 
-  const fallbackMatchedGroups: MatchedGroup[] = [
-    {
-      id: "201",
-      name: "Growth Circle #04",
-      matchRate: 95,
-      description: "Verified professionals with perfect score history.",
-      amount: "₦50,000/mo",
-      members: "8 Members"
-    },
-    {
-      id: "202",
-      name: "Fast Track Weekly",
-      matchRate: 85,
-      description: "High-velocity group for aggressive savings goals.",
-      amount: "₦12,500/wk",
-      members: "12 Members"
-    },
-    {
-      id: "203",
-      name: "Global Artisans",
-      matchRate: 80,
-      description: "Safe, beginner-friendly tier with low overhead.",
-      amount: "₦20,000/mo",
-      members: "20 Members"
-    }
-  ];
-
   // Initialize API calls through Redux
   useEffect(() => {
     dispatch(fetchMyGroups());
@@ -101,27 +75,31 @@ export const useGroups = () => {
       const numericAmt = parseFloat(matchAmount.replace(/,/g, "")) || 10000;
       const resp = await groupsService.autoMatchGroup({
         contribution_amount: numericAmt,
-        frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly'
+        frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly',
+        user_id: sessionStorage.getItem("userId") as string,
       });
+      console.log(resp, "resp")
 
       if (resp.success && resp.data?.matches) {
         const mapped = resp.data.matches.map((m: any) => ({
           id: m.match_id,
-          name: `Match ${m.match_id.split('_')[1] || 'Circle'}`,
+          name: `Ajo Circle Match`,
           matchRate: m.compatibility_score,
-          description: `Estimated to launch on ${new Date(m.estimated_start_date).toLocaleDateString()}.`,
+          description: `Launch date: ${new Date(m.estimated_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
           amount: `₦${m.contribution_amount.toLocaleString()}/${m.frequency === 'weekly' ? 'wk' : 'mo'}`,
-          members: `${m.proposed_members?.length || 0} Members`
+          members: `${m.proposed_members?.length || 0} Members`,
+          proposedMembers: m.proposed_members || []
         }));
         setMatchedGroups(mapped);
+        setShowMatches(true);
       } else {
-        setMatchedGroups(fallbackMatchedGroups);
+        setMatchedGroups([]);
       }
-    } catch {
-      setMatchedGroups(fallbackMatchedGroups);
+    } catch (error) {
+      console.error("Match failed:", error);
+      setMatchedGroups([]);
     } finally {
       setIsMatching(false);
-      setShowMatches(true);
     }
   };
 
@@ -154,7 +132,7 @@ export const useGroups = () => {
     setActiveTab,
     myGroups,
     publicGroups: filteredPublicGroups,
-    matchedGroups: showMatches ? matchedGroups : fallbackMatchedGroups,
+    matchedGroups,
     searchQuery,
     setSearchQuery,
     searchFilter,
