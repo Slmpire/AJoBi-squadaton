@@ -191,7 +191,7 @@ export const useGroupDetails = (groupId: string) => {
     if (!user?.user_id || !groupId) return;
     
     // According to backend: "if the group is not longer a n awaiting group. then we they commence the ajo , the members can initiate payment"
-    if (group?.status === 'Awaiting' || group?.status === 'awaiting') {
+    if (groupInfo.status === 'Awaiting' || groupInfo.status === 'awaiting') {
       alert("Payments can only be initiated once the group has commenced (no longer awaiting members).");
       return;
     }
