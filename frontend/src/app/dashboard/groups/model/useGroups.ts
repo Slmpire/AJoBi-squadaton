@@ -74,20 +74,21 @@ export const useGroups = () => {
     try {
       const numericAmt = parseFloat(matchAmount.replace(/,/g, "")) || 10000;
       const resp = await groupsService.autoMatchGroup({
-        contribution_amount: numericAmt,
-        frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly',
+        contribution_amount: 5000,
+        // frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly',
+        frequency: 'weekly',
         user_id: localStorage.getItem("userId") as string,
       });
       console.log(resp, "resp")
 
-      if (resp.success && resp.data?.matches) {
-        const mapped = resp.data.matches.map((m: any) => ({
-          id: m.match_id,
-          name: `Ajo Circle Match`,
-          matchRate: m.compatibility_score,
-          description: `Launch date: ${new Date(m.estimated_start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`,
-          amount: `₦${m.contribution_amount.toLocaleString()}/${m.frequency === 'weekly' ? 'wk' : 'mo'}`,
-          members: `${m.proposed_members?.length || 0} Members`,
+      if (resp.success && resp.data?.recommended_groups) {
+        const mapped = resp.data.recommended_groups.map((m: any) => ({
+          id: m.group_id,
+          name: m.group_name || `Ajo Circle Match`,
+          matchRate: m.group_compatibility_score,
+          description: m.why_recommended || `Compatible trust circle based on your Ajo Score.`,
+          amount: `₦${parseFloat(m.contribution_amount).toLocaleString()}/${m.frequency === 'weekly' ? 'wk' : 'mo'}`,
+          members: `${m.current_members || 0}/${m.max_members || 10} Members`,
           proposedMembers: m.proposed_members || []
         }));
         setMatchedGroups(mapped);

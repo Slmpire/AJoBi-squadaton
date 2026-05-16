@@ -1,6 +1,7 @@
 "use client";
 
 import { Sparkles, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { MatchedGroup } from "../model/useGroups";
 
 interface AutoMatchProps {
@@ -128,9 +129,12 @@ export default function AutoMatch({
                   <span className="text-gray-500">{group.members}</span>
                 </div>
 
-                <button className="w-full bg-[#F1F6F3] hover:bg-[#066B44] text-[#066B44] hover:text-white py-2.5 rounded-xl text-[12px] font-extrabold transition-colors">
+                <Link 
+                  href={`/dashboard/groups/${group.id}`}
+                  className="w-full bg-[#F1F6F3] hover:bg-[#066B44] text-[#066B44] hover:text-white py-2.5 rounded-xl text-[12px] font-extrabold transition-colors flex items-center justify-center"
+                >
                   Review Members
-                </button>
+                </Link>
               </div>
             </div>
           ))}

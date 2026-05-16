@@ -24,7 +24,9 @@ export default function GroupsOverviewPage() {
     setMatchFrequency,
     isMatching,
     showMatches,
-    handleFindMatch
+    handleFindMatch,
+    activeTab,
+    setActiveTab
   } = useGroups();
 
   return (
@@ -33,16 +35,21 @@ export default function GroupsOverviewPage() {
       {/* Sub Header with Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#E8EFE8]">
         <div className="flex items-center gap-8">
-          {['My Groups', 'Browse Groups', 'Auto-Match'].map((tab, i) => (
+          {[
+            { id: 'my', label: 'My Groups' },
+            { id: 'browse', label: 'Browse Groups' },
+            { id: 'match', label: 'Auto-Match' }
+          ].map((tab) => (
             <button 
-              key={tab}
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
               className={`text-[14px] font-bold pb-4 -mb-4.5 border-b-2 transition-all whitespace-nowrap ${
-                i === 0 
+                activeTab === tab.id 
                   ? 'text-[#066B44] border-[#066B44]' 
                   : 'text-gray-400 border-transparent hover:text-gray-600'
               }`}
             >
-              {tab}
+              {tab.label}
             </button>
           ))}
         </div>
@@ -55,31 +62,33 @@ export default function GroupsOverviewPage() {
         </Link>
       </div>
 
-      {/* Active My Groups Section */}
-      <MyGroups groups={myGroups} />
+      {/* Conditional Rendering based on Tabs */}
+      {activeTab === 'my' && <MyGroups groups={myGroups} />}
 
-      {/* Browse Public Groups Widget */}
-      <BrowseGroups 
-        groups={publicGroups} 
-        searchFilter={searchFilter}
-        setSearchFilter={setSearchFilter}
-        amountFilter={amountFilter}
-        setAmountFilter={setAmountFilter}
-        frequencyFilter={frequencyFilter}
-        setFrequencyFilter={setFrequencyFilter}
-      />
+      {activeTab === 'browse' && (
+        <BrowseGroups 
+          groups={publicGroups} 
+          searchFilter={searchFilter}
+          setSearchFilter={setSearchFilter}
+          amountFilter={amountFilter}
+          setAmountFilter={setAmountFilter}
+          frequencyFilter={frequencyFilter}
+          setFrequencyFilter={setFrequencyFilter}
+        />
+      )}
 
-      {/* AI Auto Matching Module */}
-      <AutoMatch 
-        matchAmount={matchAmount}
-        setMatchAmount={setMatchAmount}
-        matchFrequency={matchFrequency}
-        setMatchFrequency={setMatchFrequency}
-        isMatching={isMatching}
-        showMatches={showMatches}
-        onFindMatch={handleFindMatch}
-        matchedGroups={matchedGroups}
-      />
+      {activeTab === 'match' && (
+        <AutoMatch 
+          matchAmount={matchAmount}
+          setMatchAmount={setMatchAmount}
+          matchFrequency={matchFrequency}
+          setMatchFrequency={setMatchFrequency}
+          isMatching={isMatching}
+          showMatches={showMatches}
+          onFindMatch={handleFindMatch}
+          matchedGroups={matchedGroups}
+        />
+      )}
     </div>
   );
 }

@@ -84,10 +84,14 @@ export default function GroupHeader({
             {isMember && (
               <button 
                 onClick={onPayment}
-                disabled={isPaying}
-                className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all disabled:opacity-70"
+                disabled={isPaying || status.toLowerCase().includes('awaiting')}
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-extrabold shadow-md transition-all ${
+                  status.toLowerCase().includes('awaiting')
+                    ? "bg-gray-100 text-gray-400 cursor-not-allowed shadow-none border border-gray-200"
+                    : "bg-[#066B44] hover:bg-[#055737] text-white shadow-[#066B44]/10 disabled:opacity-70"
+                }`}
               >
-                {isPaying ? "Processing..." : "Make Payment"}
+                {isPaying ? "Processing..." : status.toLowerCase().includes('awaiting') ? "Awaiting Commencement" : "Make Payment"}
               </button>
             )}
           </div>
