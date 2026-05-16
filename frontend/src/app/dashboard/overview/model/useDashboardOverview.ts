@@ -88,7 +88,7 @@ export const useDashboardOverview = () => {
   useEffect(() => {
     const userId = user?.user_id; 
     
-    dispatch(fetchMyGroups());
+    dispatch(fetchMyGroups(userId));
     dispatch(fetchListings({ limit: 5 }));
     dispatch(fetchSavingsOverview());
     dispatch(fetchProfile());

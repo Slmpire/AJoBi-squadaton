@@ -67,21 +67,22 @@ const initialState: GroupsState = {
 
 export const fetchMyGroups = createAsyncThunk(
   'groups/fetchMyGroups',
-  async (_, { rejectWithValue }) => {
+  async (userId: string, { rejectWithValue }) => {
     try {
-      const response = await groupsService.getMyGroups();
+      const response = await groupsService.getMyGroups(userId);
       console.log("my groups", response.data);
       if (response.success && response.data?.groups) {
         return response.data.groups.map((g: any) => ({
           id: g.group_id,
           name: g.name,
-          type: `${g.frequency.charAt(0).toUpperCase() + g.frequency.slice(1)} Contribution`,
+          type: `${g.frequency.charAt(0).toUpperCase() + g.frequency.slice(1)} Rotation`,
           contribution: `₦${parseFloat(g.contribution_amount).toLocaleString()}`,
-          nextPayout: g.next_contribution_date ? new Date(g.next_contribution_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'TBD',
-          position: `${g.my_rotation_position} in line`,
+          nextPayout: g.my_payout_date ? new Date(g.my_payout_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Awaiting start',
+          position: `${g.my_rotation_position}/${g.total_cycles}`,
           status: g.my_contribution_status === 'paid' ? 'Paid' : g.my_contribution_status === 'missed' ? 'Missed' : 'Pending',
-          members: g.total_cycles,
-          avatars: []
+          members: g.total_cycles || 10,
+          avatars: [],
+          nextRecipient: g.next_recipient || "TBD"
         }));
       }
       return [];
@@ -101,14 +102,14 @@ export const fetchPublicGroups = createAsyncThunk(
         return response.data.groups.map((g: any) => ({
           id: g.group_id,
           name: g.name,
-          admin: g.creator_name || "Admin",
-          amount: `₦${(parseFloat(g.contribution_amount) / 1000)}K/${g.frequency === 'weekly' ? 'wk' : g.frequency === 'monthly' ? 'mo' : 'bw'}`,
+          admin: g.creator_name || "AjoBI Member",
+          amount: `₦${parseFloat(g.contribution_amount).toLocaleString()}/${g.frequency === 'weekly' ? 'wk' : g.frequency === 'monthly' ? 'mo' : 'bw'}`,
           rawAmount: parseFloat(g.contribution_amount),
           frequency: g.frequency === 'weekly' ? 'Weekly' : g.frequency === 'monthly' ? 'Monthly' : 'Bi-Weekly',
-          slots: `${g.spots_remaining} of ${g.max_members} available`,
-          minScore: g.min_ajo_score,
-          locked: g.locked === 'locked',
-          tierRequired: g.tier
+          slots: g.spots_remaining ? `${g.spots_remaining} slots left` : `${g.total_cycles || 10} positions`,
+          minScore: g.min_ajo_score || 450,
+          locked: g.locked === 'locked' || g.is_locked,
+          tierRequired: g.tier || "Bronze"
         }));
       }
       return [];

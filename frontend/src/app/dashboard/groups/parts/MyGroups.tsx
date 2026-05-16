@@ -33,8 +33,12 @@ export default function MyGroups({ groups }: { groups: GroupItem[] }) {
               
               <div className="grid grid-cols-2 gap-4 py-4 border-t border-b border-[#E8EFE8] mb-6">
                 <div>
-                  <p className="text-[10px] font-extrabold text-gray-400 uppercase">Next Payout</p>
-                  <p className="text-[13px] font-bold text-gray-800 mt-0.5">{group.nextPayout}</p>
+                  <p className="text-[10px] font-extrabold text-gray-400 uppercase">
+                    {group.nextPayout === 'Awaiting start' ? 'Next Recipient' : 'Next Payout'}
+                  </p>
+                  <p className="text-[13px] font-bold text-gray-800 mt-0.5">
+                    {group.nextPayout === 'Awaiting start' ? (group as any).nextRecipient : group.nextPayout}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] font-extrabold text-gray-400 uppercase">Position</p>

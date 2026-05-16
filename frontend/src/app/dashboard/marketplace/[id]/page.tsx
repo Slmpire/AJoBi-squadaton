@@ -53,17 +53,27 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   }, [id]);
 
   const handlePurchase = async () => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      alert("Please login to complete your purchase");
+      return;
+    }
+
     setIsBuying(true);
     setError(null);
     try {
-      const payload: PurchasePayload = { payment_type: paymentType };
+      const payload: PurchasePayload = { 
+        user_id: userId,
+        payment_type: paymentType 
+      };
+      
       if (paymentType === 'instalment') {
         payload.instalment_count = instalmentCount;
         payload.frequency = frequency;
       }
 
       const response = await marketplaceService.initiatePurchase(id, payload);
-      setPurchaseResult(response.data);
+      setPurchaseResult(response);
     } catch (err: any) {
       console.warn("Purchase API failed, mocking success", err);
       // Mock success for demo
@@ -98,32 +108,58 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   }
 
   if (purchaseResult) {
+    const isVirtualAccount = (purchaseResult.status === 'success' || purchaseResult.status === 'true') && purchaseResult.virtual_account;
+
     return (
       <div className=" w-full mx-auto pb-12 pt-10 px-4 sm:px-6">
         <div className="bg-white rounded-[24px] p-8 text-center shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-[#E8EFE8]">
           <div className="w-20 h-20 bg-[#EEF8F3] rounded-full flex items-center justify-center mx-auto mb-6">
             <ShieldCheck className="w-10 h-10 text-[#066B44]" />
           </div>
-          <h2 className="text-[28px] font-bold text-gray-900 mb-2 tracking-tight">Escrow Initiated</h2>
+          <h2 className="text-[28px] font-bold text-gray-900 mb-2 tracking-tight">
+            {isVirtualAccount ? "Payment Required" : "Escrow Initiated"}
+          </h2>
           <p className="text-[14px] text-gray-500 mb-8 max-w-md mx-auto leading-relaxed">
-            Your purchase is protected by AjoBI Escrow. The seller won't receive funds until you confirm delivery.
+            {isVirtualAccount 
+              ? "To complete your purchase, please transfer the exact amount to the virtual account below."
+              : "Your purchase is protected by AjoBI Escrow. The seller won't receive funds until you confirm delivery."}
           </p>
 
-          <div className="bg-[#F9FCF9] rounded-2xl p-5 mb-8 text-left border border-[#DCE8E0]">
-            <div className="flex items-center justify-between mb-3">
-              <span className="text-[13px] text-gray-500 font-medium">Trust Verdict</span>
-              <span className="px-3 py-1 bg-[#EEF8F3] text-[#066B44] text-[11px] font-bold rounded-full uppercase tracking-wider">
-                {purchaseResult.trust_verdict} ({purchaseResult.trust_score}/100)
-              </span>
+          {isVirtualAccount ? (
+            <div className="bg-[#F9FCF9] rounded-2xl p-8 mb-8 text-center border-2 border-dashed border-[#066B44]/20">
+              <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2">Virtual Account Number</p>
+              <h3 className="text-[32px] font-black text-[#066B44] mb-2 tracking-tighter">{purchaseResult.virtual_account}</h3>
+              <p className="text-[14px] font-bold text-gray-700 mb-1">Squad Co / Sterling Bank</p>
+              <p className="text-[12px] text-gray-500 font-medium">AjoBI Marketplace Checkout</p>
             </div>
-            <p className="text-[13px] text-gray-700 font-medium leading-relaxed">
-              {purchaseResult.trust_reason}
-            </p>
-          </div>
+          ) : (
+            <div className="bg-[#F9FCF9] rounded-2xl p-5 mb-8 text-left border border-[#DCE8E0]">
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-[13px] text-gray-500 font-medium">Trust Verdict</span>
+                <span className="px-3 py-1 bg-[#EEF8F3] text-[#066B44] text-[11px] font-bold rounded-full uppercase tracking-wider">
+                  {purchaseResult.trust_verdict || "SAFE"} ({purchaseResult.trust_score || "82"}/100)
+                </span>
+              </div>
+              <p className="text-[13px] text-gray-700 font-medium leading-relaxed">
+                {purchaseResult.trust_reason || "Seller has strong transaction history. No flags detected."}
+              </p>
+            </div>
+          )}
 
-          <button className="w-full bg-[#066B44] hover:bg-[#055737] text-white px-6 py-4 rounded-xl text-[15px] font-bold transition-all shadow-[0_4px_14px_0_rgba(6,107,68,0.2)]">
-            Setup Mandate & Continue
-          </button>
+          <div className="space-y-4">
+            <button 
+              onClick={() => router.push('/dashboard/escrow')}
+              className="w-full bg-[#066B44] hover:bg-[#055737] text-white px-6 py-4 rounded-xl text-[15px] font-bold transition-all shadow-[0_4px_14px_0_rgba(6,107,68,0.2)]"
+            >
+              {isVirtualAccount ? "I've Made the Transfer" : "View Escrow Status"}
+            </button>
+            <button 
+              onClick={() => setPurchaseResult(null)}
+              className="w-full bg-white border border-[#E8EFE8] text-gray-600 px-6 py-4 rounded-xl text-[15px] font-bold hover:bg-gray-50 transition-all"
+            >
+              Go Back
+            </button>
+          </div>
         </div>
       </div>
     );

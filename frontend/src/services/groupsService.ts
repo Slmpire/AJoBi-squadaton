@@ -46,8 +46,8 @@ export const groupsService = {
     return response.data;
   },
 
-  getMyGroups: async () => {
-    const response = await apiClient.get('/api/groups/my');
+  getMyGroups: async (userId: string) => {
+    const response = await apiClient.get(`/api/mygroups/${userId}`);
     return response.data;
   },
 

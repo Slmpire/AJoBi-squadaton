@@ -63,7 +63,10 @@ export const useGroups = () => {
 
   // Initialize API calls through Redux
   useEffect(() => {
-    dispatch(fetchMyGroups());
+    const userId = localStorage.getItem("userId");
+    if (userId) {
+      dispatch(fetchMyGroups(userId));
+    }
     dispatch(fetchPublicGroups());
   }, [dispatch]);
 

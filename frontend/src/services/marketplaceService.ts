@@ -67,7 +67,8 @@ export interface BrowseListingsParams {
 }
 
 export interface PurchasePayload {
-  payment_type: 'full' | 'instalment';
+  user_id: string;
+  payment_type?: 'full' | 'instalment';
   instalment_count?: number;
   frequency?: 'daily' | 'weekly' | 'monthly';
 }

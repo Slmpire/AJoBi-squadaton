@@ -18,7 +18,7 @@ export default function ScoreCard({ score, tier, diff }: ScoreCardProps) {
           </div>
           <div className="flex items-baseline gap-1 mb-4">
             <span className="text-6xl font-extrabold tracking-tighter">{score}</span>
-            <span className="text-xl text-white/80 font-medium">/ 900</span>
+            <span className="text-xl text-white/80 font-medium">/ 100</span>
           </div>
           <div className="bg-[#FFF8E6] text-[#B8860B] px-4 py-1.5 rounded-full text-[12px] font-extrabold flex items-center gap-1.5 shadow-sm">
             <Star className="w-4 h-4 fill-current" /> {tier} Tier
