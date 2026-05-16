@@ -57,11 +57,32 @@ export const useDashboardOverview = () => {
   const { balance, isLoading: savingsLoading } = useAppSelector((state) => state.savings);
   const { profile, isLoading: settingsLoading } = useAppSelector((state) => state.settings);
   const { ajoScore, eligibility, isLoading: scoreLoading } = useAppSelector((state) => state.score);
-  const user  = useAppSelector((state) => state.auth.user);
-  console.log('user', user);
-  console.log('user id', user?.user_id);
+  const user = useAppSelector((state) => state.auth.user);
   
+  const userId = useMemo(() => {
+    if (user?.user_id) return user.user_id;
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('userId');
+    }
+    return null;
+  }, [user]);
 
+  const userEmail = useMemo(() => {
+    if (user?.email) return user.email;
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        try {
+          return JSON.parse(storedUser).email;
+        } catch (e) {
+          return null;
+        }
+      }
+    }
+    return null;
+  }, [user]);
+
+  console.log('user id', userId);
   const isLoading = groupsLoading || marketplaceLoading || savingsLoading || settingsLoading || scoreLoading;
 
   useEffect(() => {
@@ -73,7 +94,7 @@ export const useDashboardOverview = () => {
     dispatch(fetchProfile());
     dispatch(fetchAjoScore(userId));
     dispatch(fetchEligibility(userId));
-  }, [dispatch]);
+  }, [dispatch, userId]);
 
   const data = useMemo(() => {
     if (!ajoScore && isLoading) return null;
@@ -126,7 +147,7 @@ export const useDashboardOverview = () => {
     try {
       const response = await userService.updateKYC({
         ...kycData,
-        user_id: user.user_id
+        user_id: userId
       });
       console.log(response)
       if (response.success === 'true') {
@@ -145,11 +166,11 @@ export const useDashboardOverview = () => {
   };
 
   const handleCreateVirtualAccount = async () => {
-    if (!user?.user_id) return;
+    if (!userId) return;
     setVirtualAccountLoading(true);
     setKycError(null);
     try {
-      const response = await userService.createVirtualAccount(user.user_id);
+      const response = await userService.createVirtualAccount(userId);
       if (response.status === 'success') {
         setVirtualAccountData(response.data);
       }

@@ -13,6 +13,9 @@ import {
   LogOut,
   ArrowRightLeft
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAppDispatch } from "@/store";
+import { logout } from "@/store/slices/authSlice";
 
 export default function DashboardLayout({
   children,
@@ -20,6 +23,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    router.push("/login");
+  };
 
   const navItems = [
     { href: "/dashboard", label: "Home", icon: LayoutDashboard },
@@ -76,9 +86,11 @@ export default function DashboardLayout({
             })}
           </nav>
 
-          {/* Logout Bottom Trigger */}
           <div className="border-t border-[#E8EFE8] pt-6">
-            <button className="w-full flex items-center gap-3.5 px-5 py-3.5 text-gray-400 hover:text-red-600 hover:bg-red-50/50 rounded-2xl text-[14px] font-bold transition-all duration-200 group">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3.5 px-5 py-3.5 text-gray-400 hover:text-red-600 hover:bg-red-50/50 rounded-2xl text-[14px] font-bold transition-all duration-200 group"
+            >
               <LogOut className="w-[18px] h-[18px] group-hover:-translate-x-0.5 transition-transform" strokeWidth={2.5} />
               Logout
             </button>

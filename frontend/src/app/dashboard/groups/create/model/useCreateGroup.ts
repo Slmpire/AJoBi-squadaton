@@ -17,6 +17,7 @@ export interface CreateGroupFormData {
 export const useCreateGroup = () => {
   const router = useRouter();
   const user = useAppSelector((state: RootState) => state.auth.user);
+  const userId = user?.user_id || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -58,7 +59,7 @@ export const useCreateGroup = () => {
      try {
        // Mapped variables to match STAGE 4 backend payload guidelines
        const payload = {
-         user_id: user?.user_id,
+         user_id: userId,
          name: formData.name,
          contribution_amount: parseFloat(formData.amount.replace(/,/g, "")),
          frequency: formData.frequency.toLowerCase() as 'weekly' | 'monthly',

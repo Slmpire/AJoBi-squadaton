@@ -35,14 +35,14 @@ export default function ScoreCard({ score, tier, diff }: ScoreCardProps) {
         <p className="text-[14px] text-gray-600 mb-6 leading-relaxed font-medium">
           Your savings consistency is strong. Add transaction history to grow faster. A higher score unlocks lower interest rates on loans and premium Ajo group invitations.
         </p>
-        <div className="flex flex-wrap gap-4">
+        {/* <div className="flex flex-wrap gap-4">
           <button className="bg-[#066B44] hover:bg-[#055737] text-white px-6 py-3 rounded-xl text-[13px] font-bold transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5">
             Boost My Score
           </button>
           <button className="border border-[#E8EFE8] text-gray-700 hover:bg-[#F9FCF9] px-6 py-3 rounded-xl text-[13px] font-bold transition-colors">
             View Report
           </button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

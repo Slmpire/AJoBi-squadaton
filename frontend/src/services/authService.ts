@@ -67,6 +67,7 @@ export const authService = {
 
     if (response.data?.success && response.data?.data?.token) {
       localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('userId', response.data.data.user_id);
     }
 
     return response.data;

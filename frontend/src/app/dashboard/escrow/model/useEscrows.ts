@@ -21,15 +21,17 @@ export const useEscrows = () => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const user = useAppSelector((state) => state.auth.user);
+  const userId = user?.user_id || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
+  
   const [escrows, setEscrows] = useState<EscrowItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchEscrows = async () => {
-      if (!user?.user_id) return;
+      if (!userId) return;
       setIsLoading(true);
       try {
-        const response = await escrowService.getUserEscrows(user.user_id, {
+        const response = await escrowService.getUserEscrows(userId, {
           type: 'payment',
           status: 'pending_funding'
         });
@@ -58,7 +60,7 @@ export const useEscrows = () => {
     };
 
     fetchEscrows();
-  }, [user?.user_id, activeFilter]);
+  }, [userId, activeFilter]);
 
   return {
     escrows,

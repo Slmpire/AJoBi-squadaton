@@ -76,7 +76,7 @@ export const useGroups = () => {
       const resp = await groupsService.autoMatchGroup({
         contribution_amount: numericAmt,
         frequency: matchFrequency.toLowerCase() as 'weekly' | 'monthly',
-        user_id: sessionStorage.getItem("userId") as string,
+        user_id: localStorage.getItem("userId") as string,
       });
       console.log(resp, "resp")
 

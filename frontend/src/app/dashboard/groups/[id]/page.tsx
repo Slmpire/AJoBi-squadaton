@@ -59,7 +59,7 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
             isMember={isMember}
             virtualAccount={virtualAccount}
             onPayment={handleInitiatePayment}
-            isPaying={isPaying}
+            isPaying={isPaying} 
           />
 
           <RotationTracker 

@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { authService, UserData, LoginResponse, RegisterResponse } from '@/services/authService';
-import axios from 'axios';
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 
 interface AuthState {
   user: UserData | null | any;
@@ -13,12 +12,12 @@ interface AuthState {
 }
 
 const initialState: AuthState = {
-  user: null,
+  user: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('user') || 'null') : null,
   token: typeof window !== 'undefined' ? localStorage.getItem('token') : null,
-  isAuthenticated: false,
+  isAuthenticated: typeof window !== 'undefined' ? !!localStorage.getItem('token') : false,
   isLoading: false,
   error: null,
-  onboardingComplete: null,
+  onboardingComplete: typeof window !== 'undefined' ? JSON.parse(localStorage.getItem('onboardingComplete') || 'null') : null,
 };
 
 export const fetchCurrentUser = createAsyncThunk(
@@ -79,6 +78,8 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       state.onboardingComplete = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      localStorage.removeItem('onboardingComplete');
     },
     setAuthError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
@@ -97,6 +98,8 @@ const authSlice = createSlice({
         state.isAuthenticated = !!action.payload;
         if (action.payload) {
           state.onboardingComplete = action.payload.onboarding_complete;
+          localStorage.setItem('user', JSON.stringify(action.payload));
+          localStorage.setItem('onboardingComplete', JSON.stringify(action.payload.onboarding_complete));
         }
       })
       .addCase(fetchCurrentUser.rejected, (state, action) => {
@@ -115,6 +118,14 @@ const authSlice = createSlice({
         state.token = action.payload?.data?.token || null;
         state.onboardingComplete = action.payload?.data?.onboarding_complete || false;
         state.user = action.payload?.data || null;
+        
+        if (action.payload?.data?.token) {
+          localStorage.setItem('token', action.payload.data.token);
+        }
+        if (action.payload?.data) {
+          localStorage.setItem('user', JSON.stringify(action.payload.data));
+          localStorage.setItem('onboardingComplete', JSON.stringify(action.payload.data.onboarding_complete || false));
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
@@ -130,6 +141,15 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         state.token = action.payload?.data?.token || null;
         state.onboardingComplete = action.payload?.data?.onboarding_complete || false;
+        state.user = action.payload?.data || null;
+
+        if (action.payload?.data?.token) {
+          localStorage.setItem('token', action.payload.data.token);
+        }
+        if (action.payload?.data) {
+          localStorage.setItem('user', JSON.stringify(action.payload.data));
+          localStorage.setItem('onboardingComplete', JSON.stringify(action.payload.data.onboarding_complete || false));
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.isLoading = false;

@@ -6,6 +6,7 @@ import { escrowService, CreateEscrowPayload } from '@/services/escrowService';
 export const useCreateEscrow = () => {
   const router = useRouter();
   const user = useAppSelector((state) => state.auth.user);
+  const userId = user?.user_id || (typeof window !== 'undefined' ? localStorage.getItem('userId') : null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,13 +24,13 @@ export const useCreateEscrow = () => {
   };
 
   const handleSubmit = async () => {
-    if (!user?.user_id) return;
+    if (!userId) return;
     setIsLoading(true);
     setError(null);
     try {
       const payload: CreateEscrowPayload = {
         ...formData,
-        creator_id: user.user_id
+        creator_id: userId
       };
       
       const response = await escrowService.createEscrow(payload);
