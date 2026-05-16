@@ -147,6 +147,9 @@ export const useDashboardOverview = () => {
     try {
       const response = await userService.updateKYC({
         ...kycData,
+        bvn: '22343211654',
+        beneficiary_account: '4920299492',
+        // bank_name: kycData.bank_name,
         user_id: userId
       });
       console.log(response)
