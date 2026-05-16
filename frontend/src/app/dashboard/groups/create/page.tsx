@@ -14,6 +14,7 @@ export default function CreateGroupPage() {
     cycleDuration,
     formattedContribution,
     isSubmitting,
+    error,
     handleSubmit
   } = useCreateGroup();
 
@@ -37,6 +38,13 @@ export default function CreateGroupPage() {
           </p>
         </div>
       </div>
+      
+      {error && (
+        <div className="mb-8 p-4 bg-red-50 border border-red-100 rounded-2xl text-red-600 text-sm font-bold flex items-center gap-3 animate-shake">
+          <div className="w-6 h-6 rounded-full bg-red-100 flex items-center justify-center shrink-0">!</div>
+          {error}
+        </div>
+      )}
 
       {/* Columns Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">

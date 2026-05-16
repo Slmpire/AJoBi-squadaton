@@ -5,6 +5,8 @@ import { fetchListings } from '@/store/slices/marketplaceSlice';
 import { fetchSavingsOverview } from '@/store/slices/savingsSlice';
 import { fetchProfile } from '@/store/slices/settingsSlice';
 import { fetchAjoScore, fetchEligibility } from '@/store/slices/scoreSlice';
+import { userService, KYCData } from '@/services/userService';
+import { useState } from 'react';
 
 export interface DashboardData {
   ajoScore: number;
@@ -43,6 +45,12 @@ export interface DashboardData {
 
 export const useDashboardOverview = () => {
   const dispatch = useAppDispatch();
+  const [showKYCModal, setShowKYCModal] = useState(false);
+  const [kycLoading, setKycLoading] = useState(false);
+  const [virtualAccountLoading, setVirtualAccountLoading] = useState(false);
+  const [kycSuccess, setKycSuccess] = useState(false);
+  const [kycError, setKycError] = useState<string | null>(null);
+  const [virtualAccountData, setVirtualAccountData] = useState<any>(null);
   
   const { myGroups, isLoading: groupsLoading } = useAppSelector((state) => state.groups);
   const { listings, isLoading: marketplaceLoading } = useAppSelector((state) => state.marketplace);
@@ -110,8 +118,60 @@ export const useDashboardOverview = () => {
     } as DashboardData;
   }, [myGroups, listings, balance, profile, ajoScore, eligibility, isLoading]);
 
+  const handleKYCSubmit = async (kycData: Omit<KYCData, 'user_id'>) => {
+    console.log('kycData', kycData);
+    if (!user?.user_id) return false;
+    setKycLoading(true);
+    setKycError(null);
+    try {
+      const response = await userService.updateKYC({
+        ...kycData,
+        user_id: user.user_id
+      });
+      console.log(response)
+      if (response.success === 'true') {
+        setKycSuccess(true);
+        dispatch(fetchProfile());
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error('KYC update failed', error);
+      setKycError(error.message || 'KYC update failed');
+      return false;
+    } finally {
+      setKycLoading(false);
+    }
+  };
+
+  const handleCreateVirtualAccount = async () => {
+    if (!user?.user_id) return;
+    setVirtualAccountLoading(true);
+    setKycError(null);
+    try {
+      const response = await userService.createVirtualAccount(user.user_id);
+      if (response.status === 'success') {
+        setVirtualAccountData(response.data);
+      }
+    } catch (error: any) {
+      console.error('Virtual account creation failed', error);
+      setKycError(error.message || 'Virtual account creation failed');
+    } finally {
+      setVirtualAccountLoading(false);
+    }
+  };
+
   return {
     isLoading,
     data,
+    showKYCModal,
+    setShowKYCModal,
+    kycLoading,
+    kycSuccess,
+    kycError,
+    handleKYCSubmit,
+    virtualAccountLoading,
+    virtualAccountData,
+    handleCreateVirtualAccount,
   };
 };

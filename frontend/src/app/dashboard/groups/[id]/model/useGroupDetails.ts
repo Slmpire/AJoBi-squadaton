@@ -51,7 +51,14 @@ export const useGroupDetails = (groupId: string) => {
     methodDetails: "Loading status..."
   });
 
+  const [virtualAccount, setVirtualAccount] = useState<{
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  } | null>(null);
+
   const [isJoining, setIsJoining] = useState(false);
+  const [isPaying, setIsPaying] = useState(false);
   const [joinError, setJoinError] = useState<string | null>(null);
   const [isMember, setIsMember] = useState(false);
 
@@ -141,6 +148,15 @@ export const useGroupDetails = (groupId: string) => {
             // Check if user is already a member
             const memberCheck = data.rotation?.some((r: any) => r.user_id === user?.user_id);
             setIsMember(!!memberCheck);
+
+            // Handle virtual account details if they exist in the payload
+            if (data.virtual_account) {
+              setVirtualAccount({
+                bankName: data.virtual_account.bank_name || data.virtual_account.bankName || 'Squad Bank',
+                accountNumber: data.virtual_account.account_number || data.virtual_account.accountNumber,
+                accountName: data.virtual_account.account_name || data.virtual_account.accountName
+              });
+            }
           }
         }
 
@@ -170,6 +186,34 @@ export const useGroupDetails = (groupId: string) => {
 
     fetchDetails();
   }, [groupId]);
+
+  const handleInitiatePayment = async () => {
+    if (!user?.user_id || !groupId) return;
+    
+    // According to backend: "if the group is not longer a n awaiting group. then we they commence the ajo , the members can initiate payment"
+    if (group?.status === 'Awaiting' || group?.status === 'awaiting') {
+      alert("Payments can only be initiated once the group has commenced (no longer awaiting members).");
+      return;
+    }
+
+    setIsPaying(true);
+    try {
+      console.log(`Initiating payment for user ${user.user_id} in group ${groupId}`);
+      const response = await groupsService.initiateGroupPayment(user.user_id, groupId);
+      console.log("Payment initiation response:", response);
+
+      if ((response.success === 'true' || response.success === true) && response.url) {
+        window.location.href = response.url;
+      } else {
+        alert(response.message || "Failed to initiate payment. Please try again.");
+      }
+    } catch (err: any) {
+      console.error("Payment initiation failed", err);
+      alert(err.message || "An error occurred while initiating your payment slip.");
+    } finally {
+      setIsPaying(false);
+    }
+  };
 
   const handleJoinGroup = async (inviteCode?: string) => {
     setIsJoining(true);
@@ -212,6 +256,9 @@ export const useGroupDetails = (groupId: string) => {
     members,
     history,
     userStatus,
+    virtualAccount,
+    isPaying,
+    handleInitiatePayment,
     handleJoinGroup
   };
 };

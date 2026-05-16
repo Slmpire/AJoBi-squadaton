@@ -18,6 +18,7 @@ export const useCreateGroup = () => {
   const router = useRouter();
   const user = useAppSelector((state: RootState) => state.auth.user);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState<CreateGroupFormData>({
     name: "",
@@ -51,42 +52,48 @@ export const useCreateGroup = () => {
     return `₦${rawAmount.toLocaleString()}/${formData.frequency === "Weekly" ? "wk" : "mo"}`;
   }, [formData.amount, formData.frequency]);
 
-  const handleSubmit = async () => {
-    setIsSubmitting(true);
-    try {
-      // Mapped variables to match STAGE 4 backend payload guidelines
-      const payload = {
-        user_id: user?.user_id,
-        name: formData.name,
-        contribution_amount: parseFloat(formData.amount),
-        frequency: formData.frequency.toLowerCase() as 'weekly' | 'monthly',
-        max_members: formData.maxMembers,
-        // Mapped from 400-1000 UI range down to the requested backend 40-100 format
-        min_ajo_score: Math.round(formData.minScore / 10),
-        rotation_type: formData.rotationOrder === 'Random Draw' ? 'random' : 'manual' as 'random' | 'manual',
-        grace_period_hours: formData.gracePeriod === '24 Hours' ? 24 : 48 as 24 | 48,
-        description: formData.description
-      };
-
-
-      const response = await groupsService.createGroup(payload);
-      console.log("group created", response);
-      
-      if (response.success) {
-        router.push(`/dashboard/groups/${response.data.group_id}`);
-      } else {
-        router.push("/dashboard/groups");
-      }
-
-    } catch (error) {
-      console.warn("API Creation failover to simulation", error);
-      // Seamless fallback simulation so front-end stays interactive without active local APIs
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      router.push("/dashboard/groups");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+   const handleSubmit = async () => {
+     setIsSubmitting(true);
+     setError(null);
+     try {
+       // Mapped variables to match STAGE 4 backend payload guidelines
+       const payload = {
+         user_id: user?.user_id,
+         name: formData.name,
+         contribution_amount: parseFloat(formData.amount.replace(/,/g, "")),
+         frequency: formData.frequency.toLowerCase() as 'weekly' | 'monthly',
+         max_members: formData.maxMembers,
+         // Mapped from 400-1000 UI range down to the requested backend 40-100 format
+         min_ajo_score: Math.round(formData.minScore / 10),
+         rotation_type: formData.rotationOrder === 'Random Draw' ? 'random' : 'manual' as 'random' | 'manual',
+         grace_period_hours: formData.gracePeriod === '24 Hours' ? 24 : 48 as 24 | 48,
+         description: formData.description
+       };
+ 
+       const response = await groupsService.createGroup(payload);
+       console.log("group creation response", response);
+       
+       if (response.success && response.data?.group_id) {
+         // Automatically generate group virtual account immediately after creation
+         try {
+           await groupsService.createGroupVirtualAccount(response.data.group_id);
+           console.log("Group virtual account generated successfully");
+         } catch (vaError) {
+           console.error("Failed to generate group virtual account", vaError);
+         }
+         
+         router.push(`/dashboard/groups/${response.data.group_id}`);
+       } else {
+         setError(response.message || "Failed to create group. Please check your inputs.");
+       }
+ 
+     } catch (err: any) {
+       console.error("Group creation error:", err);
+       setError(err.message || "An unexpected error occurred while creating the group.");
+     } finally {
+       setIsSubmitting(false);
+     }
+   };
 
   return {
     formData,
@@ -95,6 +102,7 @@ export const useCreateGroup = () => {
     cycleDuration,
     formattedContribution,
     isSubmitting,
+    error,
     handleSubmit
   };
 };

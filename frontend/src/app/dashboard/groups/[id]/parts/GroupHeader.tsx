@@ -1,6 +1,6 @@
 "use client";
 
-import { Users, ArrowLeft } from "lucide-react";
+import { Users, ArrowLeft, Building } from "lucide-react";
 import Link from "next/link";
 
 interface GroupHeaderProps {
@@ -13,6 +13,13 @@ interface GroupHeaderProps {
   onJoin: () => void;
   isJoining: boolean;
   isMember: boolean;
+  onPayment: () => void;
+  isPaying: boolean;
+  virtualAccount?: {
+    bankName: string;
+    accountNumber: string;
+    accountName: string;
+  } | null;
 }
 
 export default function GroupHeader({
@@ -24,7 +31,10 @@ export default function GroupHeader({
   totalCycles,
   onJoin,
   isJoining,
-  isMember
+  isMember,
+  virtualAccount,
+  onPayment,
+  isPaying
 }: GroupHeaderProps) {
   const progress = (currentCycle / totalCycles) * 100;
 
@@ -72,8 +82,12 @@ export default function GroupHeader({
             )}
             
             {isMember && (
-              <button className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all">
-                Make Payment
+              <button 
+                onClick={onPayment}
+                disabled={isPaying}
+                className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all disabled:opacity-70"
+              >
+                {isPaying ? "Processing..." : "Make Payment"}
               </button>
             )}
           </div>
@@ -93,6 +107,27 @@ export default function GroupHeader({
             </span>
           </div>
         </div>
+        
+        {/* Virtual Account Section (Visible to Members) */}
+        {isMember && virtualAccount && (
+          <div className="mt-6 pt-6 border-t border-[#F1F6F3]">
+            <div className="bg-[#F8FBF8] rounded-2xl p-4 border border-[#E8EFE8] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white border border-[#DCE8E0] text-[#066B44] flex items-center justify-center shrink-0">
+                  <Building className="w-5 h-5" />
+                </div>
+                <div>
+                  <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Group Payment Account</p>
+                  <p className="text-[14px] font-black text-gray-900">{virtualAccount.bankName} • {virtualAccount.accountNumber}</p>
+                </div>
+              </div>
+              <div className="flex flex-col sm:items-end">
+                <p className="text-[11px] font-extrabold text-gray-400 uppercase tracking-widest">Account Name</p>
+                <p className="text-[14px] font-bold text-[#066B44]">{virtualAccount.accountName}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
       </div>
     </div>

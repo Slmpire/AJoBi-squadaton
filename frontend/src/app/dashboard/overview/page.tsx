@@ -6,9 +6,20 @@ import ScoreCard from "./parts/ScoreCard";
 import QuickActions from "./parts/QuickActions";
 import ActiveOverview from "./parts/ActiveOverview";
 import RecentActivity from "./parts/RecentActivity";
+import KYCSection from "./parts/KYCSection";
 
 export default function DashboardOverviewPage() {
-  const { isLoading, data } = useDashboardOverview();
+  const { 
+    isLoading, 
+    data,
+    kycLoading,
+    kycSuccess,
+    kycError,
+    handleKYCSubmit,
+    virtualAccountLoading,
+    virtualAccountData,
+    handleCreateVirtualAccount
+  } = useDashboardOverview();
 
   if (isLoading) {
     return (
@@ -36,6 +47,16 @@ export default function DashboardOverviewPage() {
         score={data.ajoScore} 
         tier={data.scoreTier} 
         diff={data.scoreDiff} 
+      />
+
+      <KYCSection 
+        kycLoading={kycLoading}
+        kycSuccess={kycSuccess}
+        onKYCSubmit={handleKYCSubmit}
+        virtualAccountLoading={virtualAccountLoading}
+        virtualAccountData={virtualAccountData}
+        onCreateVirtualAccount={handleCreateVirtualAccount}
+        error={kycError}
       />
 
       {/* Fast Quick Action Hub */}

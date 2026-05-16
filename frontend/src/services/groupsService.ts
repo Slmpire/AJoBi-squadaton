@@ -76,5 +76,18 @@ export const groupsService = {
       params: { cycle }
     });
     return response.data;
+  },
+
+  createGroupVirtualAccount: async (groupId: string | number) => {
+    const response = await apiClient.post('/api/user/groupvirtualaccounts', { group_id: groupId });
+    return response.data;
+  },
+
+  initiateGroupPayment: async (userId: string | number, groupId: string | number) => {
+    const response = await apiClient.post('/api/user/group_payment', { 
+      user_id: userId, 
+      group_id: groupId 
+    });
+    return response.data;
   }
 };

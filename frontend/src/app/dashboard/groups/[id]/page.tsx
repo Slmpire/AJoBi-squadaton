@@ -22,6 +22,9 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
     members,
     history,
     userStatus,
+    virtualAccount,
+    isPaying,
+    handleInitiatePayment,
     handleJoinGroup,
     isJoining,
     isMember
@@ -54,6 +57,9 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
             onJoin={handleJoinGroup}
             isJoining={isJoining}
             isMember={isMember}
+            virtualAccount={virtualAccount}
+            onPayment={handleInitiatePayment}
+            isPaying={isPaying}
           />
 
           <RotationTracker 
