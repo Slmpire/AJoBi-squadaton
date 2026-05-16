@@ -58,7 +58,7 @@ export default function KYCSection({
           </div>
           <div className="bg-[#F1F6F3] p-5 rounded-2xl space-y-1">
             <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Account Number</p>
-            <p className="text-lg font-bold text-gray-900">{virtualAccountData.accountNumber || '0000000000'}</p>
+            <p className="text-lg font-bold text-gray-900">{virtualAccountData.accountNumber || '0680513429'}</p>
           </div>
         </div>
         

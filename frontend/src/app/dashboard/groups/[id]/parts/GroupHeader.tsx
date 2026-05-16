@@ -1,6 +1,7 @@
 "use client";
 
-import { Users, ArrowLeft, Building } from "lucide-react";
+import { useState } from "react";
+import { Users, ArrowLeft, Building, Ticket } from "lucide-react";
 import Link from "next/link";
 
 interface GroupHeaderProps {
@@ -10,9 +11,9 @@ interface GroupHeaderProps {
   rotation: string;
   currentCycle: number;
   totalCycles: number;
-  onJoin: () => void;
   isJoining: boolean;
   isMember: boolean;
+  onJoin: (code?: string) => void;
   onPayment: () => void;
   isPaying: boolean;
   virtualAccount?: {
@@ -36,6 +37,7 @@ export default function GroupHeader({
   onPayment,
   isPaying
 }: GroupHeaderProps) {
+  const [inviteCode, setInviteCode] = useState("");
   const progress = (currentCycle / totalCycles) * 100;
 
   return (
@@ -65,21 +67,33 @@ export default function GroupHeader({
             </div>
           </div>
 
-          {/* Right side with actions */}
-          <div className="flex flex-wrap items-center gap-3 shrink-0">
-            {!isMember ? (
-              <button 
-                onClick={onJoin}
-                disabled={isJoining}
-                className="px-5 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all flex items-center gap-2 disabled:opacity-70"
-              >
-                {isJoining ? "Joining..." : "Join group"}
-              </button>
-            ) : (
-              <button className="px-5 py-2.5 rounded-xl bg-white border border-[#E8EFE8] text-[13px] font-bold text-gray-700 hover:bg-[#F9FCF9] transition-colors">
-                Share Group
-              </button>
-            )}
+           {/* Right side with actions */}
+           <div className="flex flex-wrap items-center gap-3 shrink-0">
+             {!isMember ? (
+               <div className="flex items-center gap-2">
+                 <div className="relative group">
+                   <Ticket className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-[#066B44] transition-colors" />
+                   <input 
+                     type="text" 
+                     placeholder="Invite Code (Optional)"
+                     value={inviteCode}
+                     onChange={(e) => setInviteCode(e.target.value.toUpperCase())}
+                     className="pl-9 pr-4 py-2.5 rounded-xl border border-[#E8EFE8] text-[13px] font-bold outline-none focus:border-[#066B44] bg-[#FAFCFB] transition-all w-[180px]"
+                   />
+                 </div>
+                 <button 
+                   onClick={() => onJoin(inviteCode)}
+                   disabled={isJoining}
+                   className="px-6 py-2.5 rounded-xl bg-[#066B44] hover:bg-[#055737] text-white text-[13px] font-extrabold shadow-md shadow-[#066B44]/10 transition-all flex items-center gap-2 disabled:opacity-70"
+                 >
+                   {isJoining ? "Joining..." : "Join group"}
+                 </button>
+               </div>
+             ) : (
+               <button className="px-5 py-2.5 rounded-xl bg-white border border-[#E8EFE8] text-[13px] font-bold text-gray-700 hover:bg-[#F9FCF9] transition-colors">
+                 Share Group
+               </button>
+             )}
             
             {isMember && (
               <button 

@@ -30,6 +30,8 @@ export default function GroupDetailsPage({ params }: { params: Promise<{ id: str
     isMember
   } = useGroupDetails(id);
 
+  console.log(isMember);
+
   if (isLoading) {
     return (
       <div className="w-full h-[60vh] flex flex-col items-center justify-center">

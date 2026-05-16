@@ -43,7 +43,7 @@ export default function DashboardLayout({
 
   const navItems = [
     { href: "/dashboard", label: "Home", icon: LayoutDashboard },
-    { href: "/dashboard/savings", label: "Savings", icon: Wallet },
+    // { href: "/dashboard/savings", label: "Savings", icon: Wallet },  
     { href: "/dashboard/marketplace", label: "Marketplace", icon: Store },
     { href: "/dashboard/groups", label: "Ajo Groups", icon: Users },
     { href: "/dashboard/escrow", label: "My Escrows", icon: ArrowRightLeft },
