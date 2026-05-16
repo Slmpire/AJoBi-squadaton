@@ -1,4 +1,6 @@
 "use client";
+ 
+import { useState, useEffect } from "react";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -11,7 +13,9 @@ import {
   Bell,
   User,
   LogOut,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Menu,
+  X
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAppDispatch } from "@/store";
@@ -25,6 +29,12 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Close mobile menu when route changes
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [pathname]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -47,8 +57,68 @@ export default function DashboardLayout({
     return match ? match.label : "Dashboard";
   };
   return (
-    <div className="min-h-screen bg-ajobi-bg flex">
-      {/* Sidebar */}
+    <div className="min-h-screen bg-ajobi-bg flex overflow-x-hidden">
+      {/* Mobile Sidebar Overlay */}
+      {isMobileMenuOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[40] md:hidden backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => setIsMobileMenuOpen(false)}
+        />
+      )}
+
+      {/* Mobile Sidebar */}
+      <aside 
+        className={`fixed inset-y-0 left-0 w-[280px] bg-[#FAFCFB] z-[50] border-r border-[#E8EFE8] transform transition-transform duration-300 ease-in-out md:hidden flex flex-col ${
+          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="h-20 flex items-center justify-between px-8 border-b border-[#E8EFE8]/50">
+          <Link href="/dashboard" className="text-2xl font-black text-[#066B44] tracking-tight flex items-center gap-2">
+            <span className="w-8 h-8 bg-[#066B44] text-white rounded-xl flex items-center justify-center font-black text-lg shadow-sm">A</span>
+            AjoBI
+          </Link>
+          <button onClick={() => setIsMobileMenuOpen(false)} className="text-gray-400 hover:text-[#066B44]">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        
+        <div className="px-4 py-8 flex-1 flex flex-col justify-between overflow-y-auto">
+          <nav className="space-y-2">
+            {navItems.map((item) => {
+              const isActive = item.href === "/dashboard" 
+                ? pathname === "/dashboard" 
+                : pathname.startsWith(item.href);
+              const Icon = item.icon;
+              return (
+                <Link 
+                  key={item.href}
+                  href={item.href} 
+                  className={`flex items-center gap-3.5 px-5 py-4 rounded-2xl text-[15px] font-bold transition-all duration-200 ${
+                    isActive 
+                      ? 'bg-[#066B44] text-white shadow-lg' 
+                      : 'text-gray-500 hover:text-[#066B44] hover:bg-[#F1F6F3]'
+                  }`}
+                >
+                  <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-gray-400'}`} strokeWidth={2.5} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="border-t border-[#E8EFE8] pt-6">
+            <button 
+              onClick={handleLogout}
+              className="w-full flex items-center gap-3.5 px-5 py-4 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-2xl text-[15px] font-bold transition-all"
+            >
+              <LogOut className="w-5 h-5" strokeWidth={2.5} />
+              Logout
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Desktop Sidebar */}
       <aside className="w-[260px] border-r border-[#E8EFE8] hidden md:flex flex-col bg-[#FAFCFB] relative z-20">
         {/* Logo Area */}
         <div className="h-20 flex items-center px-8 border-b border-[#E8EFE8]/50">
@@ -101,13 +171,19 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="h-20 border-b border-[#E8EFE8] flex items-center justify-between px-8 bg-white/80 backdrop-blur-md z-10 sticky top-0">
-          <div className="flex items-center">
-             <div className="md:hidden text-2xl font-black text-[#066B44] tracking-tight flex items-center gap-1 mr-4">
+        <header className="h-20 border-b border-[#E8EFE8] flex items-center justify-between px-4 sm:px-8 bg-white/80 backdrop-blur-md z-30 sticky top-0">
+          <div className="flex items-center gap-3">
+             <button 
+               onClick={() => setIsMobileMenuOpen(true)}
+               className="md:hidden w-10 h-10 rounded-xl flex items-center justify-center bg-[#F1F6F3] border border-[#E8EFE8] text-[#066B44]"
+             >
+               <Menu className="w-5 h-5" strokeWidth={2.5} />
+             </button>
+             <div className="md:hidden text-xl sm:text-2xl font-black text-[#066B44] tracking-tight flex items-center gap-1">
                <span className="w-7 h-7 bg-[#066B44] text-white rounded-lg flex items-center justify-center font-black text-sm">A</span>
-               AjoBI
+               <span className="hidden sm:inline">AjoBI</span>
              </div>
-             <h1 className="text-[18px] font-bold text-gray-900 tracking-tight">{getPageTitle()}</h1>
+             <h1 className="text-[16px] sm:text-[18px] font-bold text-gray-900 tracking-tight ml-1 sm:ml-0">{getPageTitle()}</h1>
           </div>
           <div className="flex items-center gap-4">
             <button className="relative w-10 h-10 rounded-full flex items-center justify-center bg-[#F1F6F3] border border-[#E8EFE8] text-[#066B44] hover:scale-105 transition-all shadow-sm">
